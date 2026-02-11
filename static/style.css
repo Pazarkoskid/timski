@@ -2,7 +2,11 @@
 .question-table {
     width: 100%;
     border-collapse: collapse;
-    border: 2px solid black;       /* надворешен дебел бордер */
+    border: 2px solid black;
+
+
+
+         /* надворешен дебел бордер */
 }
 
 .question-table th,
