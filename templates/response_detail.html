@@ -1,0 +1,574 @@
+{% extends 'base.html' %}
+
+{% block title %}Детали за одговорот - Развоен Систем{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Заглавие и навигација -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            {% if user.role == 'parent' %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'parent_dashboard' %}" class="text-decoration-none">
+                                    <i class="bi bi-house-door"></i> Мој Панел
+                                </a>
+                            </li>
+                            {% elif user.role == 'therapist' %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'therapist_dashboard' %}" class="text-decoration-none">
+                                    <i class="bi bi-clipboard-check"></i> Терапевтски Панел
+                                </a>
+                            </li>
+                            {% elif user.role == 'admin' %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_dashboard' %}" class="text-decoration-none">
+                                    <i class="bi bi-speedometer2"></i> Администраторски Панел
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li class="breadcrumb-item active" aria-current="page">
+                                <i class="bi bi-clipboard-data"></i> Детали за одговорот
+                            </li>
+                        </ol>
+                    </nav>
+                    <h1 class="h2 mb-0">
+                        <i class="bi bi-clipboard-data text-primary me-2"></i>
+                        Детали за одговорот
+                    </h1>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6 p-2">
+                        <i class="bi bi-{{ user.role }} me-1"></i>
+                        {{ user.get_role_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Информации за одговорот -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Основни информации
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <label class="text-muted small">Дете:</label>
+                                <h5 class="mb-0">
+                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                    {{ response.child.first_name }} {{ response.child.last_name }}
+                                </h5>
+                                <p class="mb-0 text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    {{ response.child.birth_date|date:"d.m.Y" }}
+                                    ({{ response.child.get_age_in_months }} месеци)
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <label class="text-muted small">Родител:</label>
+                                <h5 class="mb-0">
+                                    <i class="bi bi-person text-secondary me-2"></i>
+                                    {{ response.parent.get_full_name|default:response.parent.username }}
+                                </h5>
+                                <p class="mb-0 text-muted">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    {{ response.parent.email|default:"Без е-пошта" }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <label class="text-muted small">Прашалник:</label>
+                                <h5 class="mb-0">
+                                    <i class="bi bi-clipboard text-info me-2"></i>
+                                    {{ response.questionnaire.title }}
+                                </h5>
+                                <p class="mb-0 text-muted">
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    За {{ response.questionnaire.months }} месеци
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <label class="text-muted small">Статус:</label>
+                                <div class="d-flex align-items-center">
+                                    {% if response.status == 'submitted' %}
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="bi bi-hourglass me-1"></i>
+                                        Чека на преглед
+                                    </span>
+                                    {% elif response.status == 'reviewed' %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Прегледано
+                                    </span>
+                                    {% elif response.status == 'completed' %}
+                                    <span class="badge bg-primary fs-6">
+                                        <i class="bi bi-flag me-1"></i>
+                                        Завршено
+                                    </span>
+                                    {% endif %}
+                                    {% if response.total_points %}
+                                    <span class="badge bg-info fs-6 ms-2">
+                                        <i class="bi bi-star me-1"></i>
+                                        {{ response.total_points }} поени
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-0 text-muted mt-1">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    Поднесено: {{ response.created_at|date:"d.m.Y H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>
+                        Резиме на поени
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if response.total_points %}
+                    <div class="text-center mb-4">
+                        <div class="display-4 fw-bold text-primary mb-2">
+                            {{ response.total_points }}
+                        </div>
+                        <p class="text-muted mb-0">Вкупно поени</p>
+                        <div class="progress mt-3" style="height: 20px;">
+                            {% widthratio response.total_points 120 100 as percentage %}
+                            <div class="progress-bar 
+                                {% if response.total_points >= 90 %}bg-success
+                                {% elif response.total_points >= 60 %}bg-info
+                                {% elif response.total_points >= 30 %}bg-warning
+                                {% else %}bg-danger{% endif %}" 
+                                role="progressbar" 
+                                style="width: {{ percentage }}%">
+                                <span class="fw-bold">{{ percentage|floatformat:0 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Максимални поени</span>
+                            <span class="badge bg-secondary rounded-pill">120</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Освоени поени</span>
+                            <span class="badge bg-primary rounded-pill">{{ response.total_points }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Процент</span>
+                            <span class="badge bg-info rounded-pill">{{ percentage|floatformat:0 }}%</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-hourglass-split display-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Сеуште нема оценето</h5>
+                        <p class="text-muted">Одговорот чека на преглед од терапевт</p>
+                        {% if user.role == 'therapist' %}
+                        <a href="{% url 'therapist_response' response.id %}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square me-1"></i>
+                            Оцени го одговорот
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Забелешки -->
+    {% if response.notes or response.therapist_comments %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-text me-2"></i>
+                        Забелешки и коментари
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if response.notes %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-person me-2"></i>
+                                        Забелешки од родителот
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0">{{ response.notes|linebreaks }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if response.therapist_comments %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-heart-pulse me-2"></i>
+                                        Коментари од терапевт
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-0">{{ response.therapist_comments|linebreaks }}</p>
+                                    {% if response.total_points %}
+                                    <hr>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Вкупно поени:</span>
+                                        <span class="badge bg-primary fs-5">{{ response.total_points }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Детали за одговорите -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-check me-2"></i>
+                        Детали за одговорите
+                    </h5>
+                    <div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleAllSections()">
+                            <i class="bi bi-arrows-expand me-1"></i>
+                            Рашири ги сите
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="accordion" id="responseAccordion">
+                        {% for section in quiz.sections %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ forloop.counter }}">
+                                    <i class="bi bi-folder me-2"></i>
+                                    {{ section.name }}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ forloop.counter }}"
+                                 class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                                 data-bs-parent="#responseAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-hover table-sm">
+                                        <thead>
+                                            <tr class="table-light">
+                                                <th width="60%">Прашање</th>
+                                                <th width="20%">Одговор на родителот</th>
+                                                <th width="20%">Поени од терапевт</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for q in section.questions %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ forloop.counter }}.</strong> {{ q.text }}
+                                                    {% if q.commands %}
+                                                    <div class="mt-2 p-2 bg-light rounded small">
+                                                        <strong>Команди:</strong>
+                                                        <ul class="mb-0 ps-3">
+                                                            {% for command in q.commands %}
+                                                            <li>{{ command.command }}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <!-- КОРИСТИ SIMPLE ДИРЕКТЕН ПРИСТАП -->
+                                                    {% for key, value in answers.items %}
+                                                        {% if key == q.id %}
+                                                            {% if value is string %}
+                                                                <!-- Ако е стринг -->
+                                                                <span class="badge
+                                                                    {% if value == 'ДА' %}bg-success
+                                                                    {% elif value == 'ПОНЕКОГАШ' %}bg-warning
+                                                                    {% elif value == 'СЕ УШТЕ НЕ' %}bg-secondary
+                                                                    {% else %}bg-light text-dark{% endif %}">
+                                                                    {{ value }}
+                                                                </span>
+                                                            {% elif value.value %}
+                                                                <!-- Ако е речник со .value -->
+                                                                <span class="badge
+                                                                    {% if value.value == 'ДА' %}bg-success
+                                                                    {% elif value.value == 'ПОНЕКОГАШ' %}bg-warning
+                                                                    {% elif value.value == 'СЕ УШТЕ НЕ' %}bg-secondary
+                                                                    {% else %}bg-light text-dark{% endif %}">
+                                                                    {{ value.value }}
+                                                                </span>
+                                                                {% if value.commands %}
+                                                                <div class="mt-1">
+                                                                    <small class="text-muted">Избрани команди:</small>
+                                                                    <ul class="mb-0 small">
+                                                                        {% for cmd in value.commands %}
+                                                                        <li>{{ cmd }}</li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </div>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </td>
+                                                <td>
+                                                    <!-- КОРИСТИ SIMPLE ДИРЕКТЕН ПРИСТАП -->
+                                                    {% for key, value in therapist_points.items %}
+                                                        {% if key == q.id %}
+                                                            <span class="badge bg-info">
+                                                                {{ value }} поени
+                                                            </span>
+                                                        {% endif %}
+                                                    {% empty %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Завршни прашања -->
+                        {% if quiz.final_questions %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFinal">
+                                <button class="accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapseFinal">
+                                    <i class="bi bi-chat-square-text me-2"></i>
+                                    Завршни прашања
+                                </button>
+                            </h2>
+                            <div id="collapseFinal"
+                                 class="accordion-collapse collapse"
+                                 data-bs-parent="#responseAccordion">
+                                <div class="accordion-body">
+                                    {% for q in quiz.final_questions %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                {{ forloop.counter }}. {{ q.text }}
+                                            </h6>
+
+                                            <!-- КОРИСТИ SIMPLE ДИРЕКТЕН ПРИСТАП -->
+                                            {% for key, value in answers.items %}
+                                                {% if key == q.id %}
+                                                    {% if value is string %}
+                                                        <!-- Ако е стринг -->
+                                                        <div class="mb-3">
+                                                            <strong>Одговор:</strong>
+                                                            <span class="badge bg-info ms-2">
+                                                                {{ value }}
+                                                            </span>
+                                                        </div>
+                                                    {% elif value.value %}
+                                                        <!-- Ако е речник -->
+                                                        <div class="mb-3">
+                                                            <strong>Одговор:</strong>
+                                                            <span class="badge bg-info ms-2">
+                                                                {{ value.value }}
+                                                            </span>
+                                                        </div>
+                                                        {% if value.text %}
+                                                        <div class="p-3 bg-light rounded mb-3">
+                                                            <strong>Објаснување:</strong>
+                                                            <p class="mb-0">{{ value.text }}</p>
+                                                        </div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            <!-- КОРИСТИ SIMPLE ДИРЕКТЕН ПРИСТАП -->
+                                            {% for key, value in therapist_points.items %}
+                                                {% if key == q.id %}
+                                                <div>
+                                                    <strong>Поени:</strong>
+                                                    <span class="badge bg-success ms-2">
+                                                        {{ value }} поени
+                                                    </span>
+                                                </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            {% if user.role == 'therapist' and response.status != 'reviewed' %}
+                            <a href="{% url 'therapist_response' response.id %}" class="btn btn-primary">
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Оцени го одговорот
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-secondary" onclick="window.print()">
+                                <i class="bi bi-printer me-1"></i>
+                                Печати
+                            </button>
+                            <button class="btn btn-outline-primary ms-2" onclick="exportToPDF()">
+                                <i class="bi bi-download me-1"></i>
+                                Експортирај
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        font-weight: 500;
+        padding: 5px 10px;
+    }
+
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .accordion-button {
+        font-weight: 600;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(13, 110, 253, 0.05);
+        color: #0d6efd;
+    }
+
+    .info-item {
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    @media print {
+        .breadcrumb, .btn, .card-footer, .accordion-button:after {
+            display: none !important;
+        }
+
+        .accordion-button {
+            border: none;
+            background-color: white !important;
+            color: black !important;
+        }
+
+        .accordion-collapse {
+            display: block !important;
+            height: auto !important;
+        }
+
+        .card {
+            border: 1px solid #dee2e6;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Функција за раширување на сите секции
+    window.toggleAllSections = function() {
+        const accordionButtons = document.querySelectorAll('.accordion-button');
+        const allExpanded = Array.from(accordionButtons).every(btn => !btn.classList.contains('collapsed'));
+
+        accordionButtons.forEach(btn => {
+            if (allExpanded) {
+                // Затвори ги сите
+                if (!btn.classList.contains('collapsed')) {
+                    btn.click();
+                }
+            } else {
+                // Отвори ги сите
+                if (btn.classList.contains('collapsed')) {
+                    btn.click();
+                }
+            }
+        });
+    };
+
+    // Функција за експорт во PDF
+    window.exportToPDF = function() {
+        alert('Експортирањето во PDF е во развој. Во реална имплементација ова би генерирало PDF документ.');
+    };
+});
+</script>
+{% endblock %}

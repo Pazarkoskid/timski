@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-plus"></i> Регистрација - Родител
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-center text-muted mb-4">
+                        Регистрирајте се за да можете да пополнувате прашалници за развојот на вашето дете.
+                    </p>
+
+                    <form method="post" id="registerForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_username" class="form-label">
+                                    <i class="bi bi-person-circle"></i> Корисничко име *
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Внесете уникатно корисничко име.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_email" class="form-label">
+                                    <i class="bi bi-envelope"></i> Е-пошта *
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_first_name" class="form-label">
+                                    <i class="bi bi-person"></i> Име
+                                </label>
+                                {{ form.first_name }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_last_name" class="form-label">
+                                    <i class="bi bi-person"></i> Презиме
+                                </label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password1" class="form-label">
+                                    <i class="bi bi-lock"></i> Лозинка *
+                                </label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.password1.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password2" class="form-label">
+                                    <i class="bi bi-lock-fill"></i> Потврди лозинка *
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.password2.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_phone" class="form-label">
+                                    <i class="bi bi-telephone"></i> Телефон
+                                </label>
+                                {{ form.phone }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="id_date_of_birth" class="form-label">
+                                    <i class="bi bi-calendar"></i> Датум на раѓање
+                                </label>
+                                {{ form.date_of_birth }}
+                            </div>
+                        </div>
+
+                        <!-- Hidden field for role -->
+                        <input type="hidden" name="role" value="parent">
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    Се согласувам со 
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">условите за користење</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-person-plus"></i> Регистрирај се
+                            </button>
+                            <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                                Веќе имате сметка? Најавете се
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <small class="text-muted">
+                        Сите корисници се регистрираат како Родители
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Услови за користење</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Со регистрација на овој систем се согласувате дека:</p>
+                <ul>
+                    <li>Податоците што ги внесувате ќе се користат само за целите на следење на развојот на вашето дете</li>
+                    <li>Податоците ќе бидат видливи само за вас, терапевтот и администраторот</li>
+                    <li>Ќе користите системот соодветно и во согласност со законот</li>
+                    <li>Ќе ја чувате вашата лозинка во тајност</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затвори</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+    
+    .form-control {
+        padding: 10px;
+    }
+    
+    .form-control:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+    }
+    
+    .btn-success:hover {
+        background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+    }
+    
+    label {
+        font-weight: 500;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Bootstrap classes to form fields
+    const formFields = document.querySelectorAll('#registerForm input, #registerForm select, #registerForm textarea');
+    formFields.forEach(field => {
+        field.classList.add('form-control');
+        if (field.type === 'checkbox' || field.type === 'radio') {
+            field.classList.remove('form-control');
+            field.classList.add('form-check-input');
+        }
+    });
+    
+    // Password strength indicator
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    const strengthDiv = document.createElement('div');
+    strengthDiv.className = 'mt-1 small';
+    password1.parentNode.appendChild(strengthDiv);
+    
+    password1.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        let message = '';
+        let color = 'danger';
+        
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        switch(strength) {
+            case 0:
+            case 1:
+                message = 'Слаба лозинка';
+                color = 'danger';
+                break;
+            case 2:
+                message = 'Средна лозинка';
+                color = 'warning';
+                break;
+            case 3:
+                message = 'Добра лозинка';
+                color = 'info';
+                break;
+            case 4:
+                message = 'Јака лозинка';
+                color = 'success';
+                break;
+        }
+        
+        strengthDiv.innerHTML = `<span class="text-${color}">${message}</span>`;
+    });
+    
+    // Confirm password check
+    password2.addEventListener('input', function() {
+        if (password1.value !== password2.value && password2.value !== '') {
+            this.setCustomValidity('Лозинките не се совпаѓаат');
+            this.classList.add('is-invalid');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('is-invalid');
+        }
+    });
+});
+</script>
+{% endblock %}

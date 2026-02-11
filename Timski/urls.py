@@ -1,27 +1,29 @@
-"""
-URL configuration for Timski project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
 from django.contrib import admin
 from django.urls import path
-
-from timski_proekt.views import index, prasalnici
+from django.contrib.auth import views as auth_views
+from timski_proekt import views
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path("",index),
-    path("prasalnici/<int:mesec>/",prasalnici,name="prasalnici"),
+    path('', views.index, name='index'),
+    path('prasalnici/<int:mesec>/', views.prasalnici, name='prasalnici'),
+    
+    # Аутентификација
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('register/', views.register, name='register'),
+    
+    # Parent
+    path('parent/dashboard/', views.parent_dashboard, name='parent_dashboard'),
+    path('parent/add-child/', views.add_child, name='add_child'),
+    
+    # Therapist
+    path('therapist/dashboard/', views.therapist_dashboard, name='therapist_dashboard'),
+    path('therapist/response/<int:response_id>/', views.therapist_response, name='therapist_response'),
+    
+    # Admin
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    
+    # Заеднички
+    path('response/<int:response_id>/', views.response_detail, name='response_detail'),
 ]

@@ -26,8 +26,9 @@ SECRET_KEY = 'django-insecure-%tu!%c$_m8_@jv$d^p!wsa7!2p$^gd3)lylarh9+i9w8_+ph1a
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
-
+LOGIN_REDIRECT_URL = "/"     # каде оди после login
+LOGOUT_REDIRECT_URL = "/"
+AUTH_USER_MODEL = 'timski_proekt.CustomUser'
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'timski_proekt.apps.TimskiProektConfig',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

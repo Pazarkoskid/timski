@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Развоен Систем{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .role-badge {
+            font-size: 0.7em;
+            vertical-align: middle;
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #f8f9fa;
+        }
+        .dashboard-card {
+            transition: transform 0.2s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="bi bi-clipboard-heart"></i> Развоен Систем
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Почетна</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'parent' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'parent_dashboard' %}">Мои Одговори</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'add_child' %}">Додади Дете</a>
+                            </li>
+                        {% elif user.role == 'therapist' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'therapist_dashboard' %}">Преглед на Одговори</a>
+                            </li>
+                        {% elif user.role == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin_dashboard' %}">Администрација</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <div class="d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <span class="navbar-text me-3">
+                            <i class="bi bi-person-circle"></i>
+                            {{ user.get_full_name|default:user.username }}
+                            <span class="badge bg-light text-dark role-badge">
+                                {{ user.get_role_display }}
+                            </span>
+                        </span>
+                        <form method="post" action="{% url 'logout' %}" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-box-arrow-right"></i> Одјави се
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm me-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Најави се
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-person-plus"></i> Регистрирај се
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            {% if user.is_authenticated and user.role == 'parent' %}
+            <div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+                <div class="position-sticky pt-3">
+                    <div class="list-group">
+                        <a href="{% url 'parent_dashboard' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-house-door"></i> Почетна
+                        </a>
+                        <a href="{% url 'add_child' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-plus"></i> Додади Дете
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="collapse" data-bs-target="#childrenCollapse">
+                            <i class="bi bi-people"></i> Мои Деца
+                            <i class="bi bi-chevron-down float-end"></i>
+                        </a>
+                        <div class="collapse" id="childrenCollapse">
+                            {% for child in user.children.all %}
+                            <a href="#" class="list-group-item list-group-item-action ps-5">
+                                <i class="bi bi-person"></i> {{ child.first_name }}
+                            </a>
+                            {% empty %}
+                            <a href="{% url 'add_child' %}" class="list-group-item list-group-item-action ps-5">
+                                <i class="bi bi-plus-circle"></i> Додади дете
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+            {% else %}
+            <div class="col-12">
+            {% endif %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

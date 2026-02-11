@@ -9,8 +9,40 @@
 </head>
 <body>
 
-<div class="container mt-4">
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01"
+                aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+            <a class="navbar-brand" href="#">PROJECT</a>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/">Questions</a>
+                </li>
 
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Answers</a>
+                </li>
+            </ul>
+            <div class="d-flex gap-2">
+                {% if request.user.is_authenticated %}
+                    <span class="navbar-text me-2">{{ request.user.username }}</span>
+
+                    <form method="post" action="{% url 'logout' %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success">Logout</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-outline-success" href="{% url 'login' %}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
     <div class="row mb-3 align-items-center">
         <div class="col-8">
             <h1 class="mb-0">{{ quiz.title }}</h1>
@@ -42,7 +74,7 @@
         </div>
         <div class="col-6">
             <p class="fw-bold">Забелешки:</p>
-            <textarea class="form-control"></textarea>
+            <textarea class="form-control" style="height: 100px"></textarea>
 
         </div>
     </div>
@@ -90,7 +122,8 @@
                         </td>
                         {% for opt in q.options %}
                             <td class="radio-cell">
-                                <input type="radio" style="height: 20px;width: 20px" name="{{ q.id }}" value="{{ opt }}" required>
+                                <input type="radio" style="height: 20px;width: 20px" name="{{ q.id }}" value="{{ opt }}"
+                                       required>
                             </td>
                         {% endfor %}
 
@@ -104,35 +137,38 @@
                 {{ section.name }} ВКУПНО: _____
             </div>
         {% endfor %}
-    </form>
-    <h2>Завршни прашања</h2>
 
-    <p>Родителите можат да пишуваат дополнителни коментари во просторот.</p>
+        <h2>Завршни прашања</h2>
 
-    {% for q in quiz.final_questions %}
-        <div class="final-question mb-4">
-            <p>
-                {{ forloop.counter }}. {{ q.text }}
-            </p>
+        <p>Родителите можат да пишуваат дополнителни коментари во просторот.</p>
 
-            <textarea name="txt_{{ q.id }}" class="form-control mb-3 final-textarea-custom" rows="3"
-                      placeholder="Објаснете овде ако треба..."></textarea>
+        {% for q in quiz.final_questions %}
+            <div class="final-question mb-4">
+                <p>
+                    {{ forloop.counter }}. {{ q.text }}
+                </p>
 
-            <div class="d-flex justify-content-end final-options-custom">
+                <textarea name="txt_{{ q.id }}" class="form-control mb-3 final-textarea-custom" rows="3"
+                          placeholder="Објаснете овде ако треба..."></textarea>
 
-                {% for opt in q.options %}
-                    <div class="text-center me-4">
-                        <label class="d-block mb-1 fw-bold" for="{{ q.id }}_{{ opt }}">
-                            {{ opt }}
-                        </label>
-                        <input class="form-check-input" type="radio"
-                               name="{{ q.id }}" id="{{ q.id }}_{{ opt }}" value="{{ opt }}" required>
-                    </div>
-                {% endfor %}
+                <div class="d-flex justify-content-end final-options-custom">
 
+                    {% for opt in q.options %}
+                        <div class="text-center me-4">
+                            <label class="d-block mb-1 fw-bold" for="{{ q.id }}_{{ opt }}">
+                                {{ opt }}
+                            </label>
+                            <input class="form-check-input" type="radio"
+                                   name="{{ q.id }}" id="{{ q.id }}_{{ opt }}" value="{{ opt }}" required>
+                        </div>
+                    {% endfor %}
+
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+
+        <button>SEND</button>
+    </form>
 </div>
 </body>
 </html>

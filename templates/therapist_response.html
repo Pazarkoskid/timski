@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% comment %} {% load custom_filters %} {% endcomment %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Преглед на одговор</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Информации за одговорот
+        </div>
+        <div class="card-body">
+            <p><strong>Родител:</strong> {{ response.parent.get_full_name|default:response.parent.username }}</p>
+            <p><strong>Дете:</strong> {{ response.child.first_name }} {{ response.child.last_name }}</p>
+            <p><strong>Возраст:</strong> {{ response.child.get_age_in_months }} месеци</p>
+            <p><strong>Прашалник:</strong> {{ response.questionnaire.title }}</p>
+            <p><strong>Датум на поднесување:</strong> {{ response.created_at|date:"d.m.Y H:i" }}</p>
+            {% if response.notes %}
+                <p><strong>Забелешки од родителот:</strong> {{ response.notes }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for section in quiz.sections %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>{{ section.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th width="50%">Прашање</th>
+                                <th>Одговор на родителот</th>
+                                <th>Поени</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for q in section.questions %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ forloop.counter }}.</strong> {{ q.text }}
+                                        {% if q.commands %}
+                                            <div class="mt-2 p-2 bg-light rounded">
+                                                <small class="text-muted">Команди:</small>
+                                                <ul class="mb-0 ps-3">
+                                                    {% for command in q.commands %}
+                                                        <li>{{ command.command }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if q.example_combinations %}
+                                            <div class="mt-2 p-2 bg-light rounded">
+                                                <small class="text-muted">Примери:</small>
+                                                <!-- ВОКА ГИ ПОДГОТВИМЕ ПОДАТОЦИТЕ ВО VIEW -->
+                                                {% for answer_key, answer_value in answers.items %}
+                                                    {% if answer_key == q.id and answer_value is not string and answer_value.examples %}
+                                                        <p class="mb-0">{{ answer_value.examples }}</p>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <!-- ВОКА ГИ ПОДГОТВИМЕ ПОДАТОЦИТЕ ВО VIEW -->
+                                        {% for answer_key, answer_value in answers.items %}
+                                            {% if answer_key == q.id %}
+                                                <span class="badge
+                                                    {% if answer_value == 'ДА' %}bg-success
+                                                    {% elif answer_value == 'ПОНЕКОГАШ' %}bg-warning
+                                                    {% elif answer_value == 'СЕ УШТЕ НЕ' %}bg-secondary
+                                                    {% else %}bg-light text-dark{% endif %}">
+                                                    {{ answer_value|default:"Нема одговор" }}
+                                                </span>
+
+                                                {% if answer_value is not string and answer_value.commands %}
+                                                    <div class="mt-2">
+                                                        <small>Избрани команди:</small>
+                                                        <ul class="mb-0">
+                                                            {% for cmd in answer_value.commands %}
+                                                                <li>{{ cmd }}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <!-- ВОКА ГИ ПОДГОТВИМЕ ПОДАТОЦИТЕ ВО VIEW -->
+                                        {% for points_key, points_value in therapist_points.items %}
+                                            {% if points_key == q.id %}
+                                                <input type="number"
+                                                       name="points_{{ q.id }}"
+                                                       class="form-control"
+                                                       min="0"
+                                                       max="10"
+                                                       value="{{ points_value }}">
+                                            {% endif %}
+                                        {% empty %}
+                                            <input type="number"
+                                                   name="points_{{ q.id }}"
+                                                   class="form-control"
+                                                   min="0"
+                                                   max="10"
+                                                   value="">
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if quiz.final_questions %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Завршни прашања</h3>
+                </div>
+                <div class="card-body">
+                    {% for q in quiz.final_questions %}
+                        <div class="mb-3">
+                            <p><strong>{{ forloop.counter }}. {{ q.text }}</strong></p>
+
+                            <!-- ВОКА ГИ ПОДГОТВИМЕ ПОДАТОЦИТЕ ВО VIEW -->
+                            {% for answer_key, answer_value in answers.items %}
+                                {% if answer_key == q.id %}
+                                    <p><em>Одговор:</em>
+                                        <span class="badge bg-info">
+                                            {{ answer_value|default:"Нема одговор" }}
+                                        </span>
+                                    </p>
+
+                                    {% if answer_value is not string and answer_value.text %}
+                                        <div class="p-2 bg-light rounded">
+                                            <small class="text-muted">Објаснување:</small>
+                                            <p>{{ answer_value.text }}</p>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <div class="mt-2">
+                                <label for="points_{{ q.id }}" class="form-label">Поени:</label>
+                                <!-- ВОКА ГИ ПОДГОТВИМЕ ПОДАТОЦИТЕ ВО VIEW -->
+                                {% for points_key, points_value in therapist_points.items %}
+                                    {% if points_key == q.id %}
+                                        <input type="number"
+                                               name="points_{{ q.id }}"
+                                               id="points_{{ q.id }}"
+                                               class="form-control"
+                                               min="0"
+                                               max="10"
+                                               value="{{ points_value }}">
+                                    {% endif %}
+                                {% empty %}
+                                    <input type="number"
+                                           name="points_{{ q.id }}"
+                                           id="points_{{ q.id }}"
+                                           class="form-control"
+                                           min="0"
+                                           max="10"
+                                           value="">
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Коментари</h3>
+            </div>
+            <div class="card-body">
+                <textarea name="comments" class="form-control" rows="4" 
+                          placeholder="Внесете ваши коментари...">{{ response.therapist_comments }}</textarea>
+            </div>
+        </div>
+        
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Зачувај поени и коментари
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Автоматско пресметување на вкупно поени
+function calculateTotal() {
+    let total = 0;
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        if (input.value) {
+            total += parseInt(input.value);
+        }
+    });
+    document.getElementById('total-display').textContent = total;
+}
+
+document.querySelectorAll('input[type="number"]').forEach(input => {
+    input.addEventListener('input', calculateTotal);
+});
+
+calculateTotal(); // Пресметај на почеток
+</script>
+{% endblock %}

@@ -1,20 +1,1064 @@
-{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="mk">
 <head>
-    <title>{{ quiz.title }}</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Развоен Систем - Следење на развојот на децата</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-hero {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hero-primary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid white;
+        }
+
+        .btn-hero-primary:hover {
+            background-color: transparent;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-hero-outline {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-hero-outline:hover {
+            background-color: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), #0b5ed7);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--info-color));
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            height: 100%;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .process-step {
+            position: relative;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), #0b5ed7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+        }
+
+        .age-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        .age-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .age-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .age-label {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-size: 5rem;
+            color: rgba(13, 110, 253, 0.1);
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        .testimonial-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+        }
+
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer h5 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+
+        .footer-link {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .copyright {
+            border-top: 1px solid #343a40;
+            padding-top: 20px;
+            margin-top: 40px;
+            color: #adb5bd;
+        }
+
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 8px 15px !important;
+            margin: 0 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+
+        .stats-counter {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stats-label {
+            color: var(--secondary-color);
+            font-size: 1rem;
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Навигација -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-clipboard-heart me-2"></i>
+                Развоен Систем
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Почетна</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">За нас</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Карактеристики</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#questionnaires">Прашалници</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">Како работи</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Искуства</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Контакт</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% if user.role == 'admin' %}{% url 'admin_dashboard' %}
+                                {% elif user.role == 'therapist' %}{% url 'therapist_dashboard' %}
+                                {% else %}{% url 'parent_dashboard' %}{% endif %}">
+                                Мојот Панел
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex ms-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            Одјави се
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>
+                            Најави се
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-1"></i>
+                            Регистрирај се
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<div class="container mt-4">
-    {% for prasalnik in prasalnici %}
-        <div><a href="{% url 'prasalnici' prasalnik %}">Прашалник за {{ prasalnik }} месеци</a></div>
+    <!-- Hero секција -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1 class="hero-title">
+                        Следење на развојот на вашето дете
+                    </h1>
+                    <p class="hero-subtitle">
+                        Професионален систем за следење, оценување и поддршка на развојот на децата од 0 до 5 години. Работено со експерти во областа на развојната психологија.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        {% if user.is_authenticated %}
+                            <a href="{% if user.role == 'parent' %}{% url 'parent_dashboard' %}
+                                {% elif user.role == 'therapist' %}{% url 'therapist_dashboard' %}
+                                {% else %}{% url 'admin_dashboard' %}{% endif %}"
+                                class="btn btn-hero btn-hero-primary">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Оди во панелот
+                            </a>
+                        {% else %}
+                            <a href="{% url 'register' %}" class="btn btn-hero btn-hero-primary">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Регистрирај се како Родител
+                            </a>
+                            <a href="#how-it-works" class="btn btn-hero btn-hero-outline">
+                                <i class="bi bi-play-circle me-2"></i>
+                                Како работи
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-5 mt-lg-0">
+                    <div class="position-relative">
+                        <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=700&q=80"
+                             alt="Дете и родител"
+                             class="img-fluid rounded-3 shadow-lg"
+                             style="border: 8px solid white;">
+                        <div class="position-absolute top-0 start-0 translate-middle">
+                            <div class="bg-primary text-white rounded-circle p-3 shadow">
+                                <i class="bi bi-heart-fill fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="position-absolute bottom-0 end-0 translate-middle">
+                            <div class="bg-success text-white rounded-circle p-3 shadow">
+                                <i class="bi bi-graph-up fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Статистики -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <div class="stats-counter" id="childrenCount">0</div>
+                    <div class="stats-label">Деца во системот</div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stats-counter" id="parentsCount">0</div>
+                    <div class="stats-label">Задоволни родители</div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stats-counter" id="questionnairesCount">0</div>
+                    <div class="stats-label">Пополнети прашалници</div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stats-counter" id="therapistsCount">0</div>
+                    <div class="stats-label">Сертифицирани терапевти</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    {% endfor %}
-</div>
+    <!-- За нас -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">За Развоен Систем</h2>
+                    <p class="section-subtitle">
+                        Нашата мисија е да им помогнеме на родителите и специјалистите да го следат и поддржат развојот на децата во најважните први години од животот.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-4 animate-on-scroll">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h3 class="card-title h4 mb-3">
+                                <i class="bi bi-bullseye text-primary me-2"></i>
+                                Нашата мисија
+                            </h3>
+                            <p class="card-text">
+                                Да создадеме комплетен систем кој ќе овозможи рано откривање на можни развојни задоцнувања и да обезбеди професионална поддршка на родителите во процесот на одгледување.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Рано откривање на развојни потреби</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Индивидуален пристап за секое дете</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Соработка помеѓу родители и терапевти</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4 animate-on-scroll">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h3 class="card-title h4 mb-3">
+                                <i class="bi bi-star-fill text-warning me-2"></i>
+                                Нашите вредности
+                            </h3>
+                            <p class="card-text">
+                                Водејќи се со професионализам и емпатија, создаваме иновативни решенија кои прават реална разлика во животите на децата и нивните семејства.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="bi bi-heart-fill text-danger me-2"></i> Емпатија и разбирање</li>
+                                <li class="mb-2"><i class="bi bi-shield-check text-primary me-2"></i> Приватност и сигурност</li>
+                                <li class="mb-2"><i class="bi bi-lightbulb-fill text-info me-2"></i> Иновација и научен пристап</li>
+                                <li class="mb-2"><i class="bi bi-people-fill text-success me-2"></i> Соработка и поддршка</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Карактеристики -->
+    <section id="features" class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">Нашите карактеристики</h2>
+                    <p class="section-subtitle">
+                        Сè што ви треба за ефикасно следење на развојот на вашето дете
+                    </p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                        <h3>Стандардизирани прашалници</h3>
+                        <p>
+                            Користете научно валидирани прашалници развиени од експерти во развојната психологија.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h3>Визуелни прогреси</h3>
+                        <p>
+                            Гледајте графикони и статистики за развојот на вашето дете низ времето.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-chat-dots"></i>
+                        </div>
+                        <h3>Експертска поддршка</h3>
+                        <p>
+                            Добивајте професионални коментари и препораки од сертифицирани терапевти.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <h3>Потсетници</h3>
+                        <p>
+                            Автоматски потсетници за пополнување на прашалници според возраста на детето.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <h3>Безбедни податоци</h3>
+                        <p>
+                            Вашите податоци се целосно заштитени и достапни само на овластени лица.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-on-scroll">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <h3>Мобилен пристап</h3>
+                        <p>
+                            Пристапете до системот од било кој уред, било каде и било кога.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Прашалници по возраст -->
+    <section id="questionnaires" class="py-5">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">Достапни прашалници по возраст</h2>
+                    <p class="section-subtitle">
+                        Изберете го прашалникот што одговара на возраста на вашето дете
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                {% for mesec in prasalnici %}
+                <div class="col-6 col-md-4 col-lg-3 animate-on-scroll">
+                    <div class="age-card" onclick="redirectToQuestionnaire({{ mesec }})">
+                        <div class="age-number">{{ mesec }}</div>
+                        <div class="age-label">месеци</div>
+                        {% if user.is_authenticated and user.role == 'parent' %}
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary">
+                                Пополни прашалник
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="text-center">
+                {% if user.is_authenticated %}
+                    <a href="{% if user.role == 'parent' %}{% url 'parent_dashboard' %}{% else %}{% url 'login' %}{% endif %}"
+                       class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-rocket-takeoff me-2"></i>
+                        Започни сега
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-rocket-takeoff me-2"></i>
+                        Регистрирај се и започни
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Како работи -->
+    <section id="how-it-works" class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">Како работи нашиот систем</h2>
+                    <p class="section-subtitle">
+                        4 едноставни чекори за да започнете со следење на развојот на вашето дете
+                    </p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <div class="text-center mt-4">
+                            <i class="bi bi-person-plus fs-1 text-primary mb-3"></i>
+                            <h4>Регистрирај се</h4>
+                            <p class="mb-0">
+                                Креирајте профил како родител за да можете да додавате деца и да пополнувате прашалници.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <div class="text-center mt-4">
+                            <i class="bi bi-person fs-1 text-primary mb-3"></i>
+                            <h4>Додади дете</h4>
+                            <p class="mb-0">
+                                Додадете ги основните податоци за вашето дете, вклучувајќи го и датумот на раѓање.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <div class="text-center mt-4">
+                            <i class="bi bi-clipboard-check fs-1 text-primary mb-3"></i>
+                            <h4>Пополни прашалник</h4>
+                            <p class="mb-0">
+                                Изберете го прашалникот за соодветната возраст и одговорете на прашањата.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 animate-on-scroll">
+                    <div class="process-step">
+                        <div class="step-number">4</div>
+                        <div class="text-center mt-4">
+                            <i class="bi bi-graph-up fs-1 text-primary mb-3"></i>
+                            <h4>Добиј резултати</h4>
+                            <p class="mb-0">
+                                Добијте детален преглед и препораки од нашиот тим на специјалисти.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Искуства -->
+    <section id="testimonials" class="py-5">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">Што велат нашите корисници</h2>
+                    <p class="section-subtitle">
+                        Реални искуства од родители и терапевти кои го користат нашиот систем
+                    </p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 animate-on-scroll">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="https://static.vecteezy.com/system/resources/previews/002/002/257/non_2x/beautiful-woman-avatar-character-icon-free-vector.jpg"
+                                 alt="Марија" class="testimonial-avatar me-3">
+                            <div>
+                                <h5 class="mb-1">Марија Илиева</h5>
+                                <p class="text-muted mb-0">Мајка на 3-годишно дете</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">
+                            "Користењето на овој систем ми овозможи да го следам развојот на моето дете на професионален начин. Коментарите од терапевтот ми дадоа многу корисни насоки."
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6 animate-on-scroll">
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80"
+                                 alt="Петар" class="testimonial-avatar me-3">
+                            <div>
+                                <h5 class="mb-1">Петар Стојанов</h5>
+                                <p class="text-muted mb-0">Развоен терапевт</p>
+                            </div>
+                        </div>
+                        <p class="mb-0">
+                            "Како терапевт, овој систем ми овозможува да ги следам повеќе пациенти истовремено. Платформата е интуитивна и ми штеди многу време."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA секција -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 class="display-4 fw-bold mb-4">Подготвени да започнете?</h2>
+                    <p class="fs-5 mb-4">
+                        Придружете се на стотици родители кои веќе користат нашиот систем за да му обезбедат најдобра поддршка на своето дете.
+                    </p>
+                    <div class="d-flex justify-content-center flex-wrap gap-3">
+                        {% if user.is_authenticated %}
+                            <a href="{% if user.role == 'parent' %}{% url 'parent_dashboard' %}
+                                {% elif user.role == 'therapist' %}{% url 'therapist_dashboard' %}
+                                {% else %}{% url 'admin_dashboard' %}{% endif %}"
+                                class="btn btn-light btn-lg px-5">
+                                <i class="bi bi-arrow-right-circle me-2"></i>
+                                Продолжете кон вашиот панел
+                            </a>
+                        {% else %}
+                            <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Регистрирај се бесплатно
+                            </a>
+                            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-5">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Најави се
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5>
+                        <i class="bi bi-clipboard-heart me-2"></i>
+                        Развоен Систем
+                    </h5>
+                    <p class="mt-3">
+                        Професионална платформа за следење на развојот на децата и поддршка на родителите и терапевтите.
+                    </p>
+                    <div class="d-flex gap-3 mt-4">
+                        <a href="#" class="footer-link">
+                            <i class="bi bi-facebook fs-5"></i>
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="bi bi-twitter fs-5"></i>
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="bi bi-instagram fs-5"></i>
+                        </a>
+                        <a href="#" class="footer-link">
+                            <i class="bi bi-linkedin fs-5"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Линкови</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#about" class="footer-link">За нас</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#features" class="footer-link">Карактеристики</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#questionnaires" class="footer-link">Прашалници</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#how-it-works" class="footer-link">Како работи</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#testimonials" class="footer-link">Искуства</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Правни информации</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">Политика за приватност</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">Услови за користење</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">Политика за колачиња</a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">Често поставувани прашања</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h5 id="contact">Контакт</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            <span class="footer-link">ул. Пример 123, Скопје</span>
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-telephone me-2"></i>
+                            <a href="tel:+38970123456" class="footer-link">+389 70 123 456</a>
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-envelope me-2"></i>
+                            <a href="mailto:info@razvoensistem.mk" class="footer-link">info@razvoensistem.mk</a>
+                        </li>
+                        <li>
+                            <i class="bi bi-clock me-2"></i>
+                            <span class="footer-link">Пон-Пет: 08:00 - 17:00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center copyright">
+                    <p class="mb-0">
+                        &copy; 2025 Развоен Систем. Сите права се задржани.
+                        | Развиено со <i class="bi bi-heart-fill text-danger mx-1"></i> во Скопје
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Анимација на статистики
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stats-counter');
+            const targetValues = [156, 89, 234, 12];
+
+            counters.forEach((counter, index) => {
+                const target = targetValues[index];
+                let current = 0;
+                const increment = target / 100;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        counter.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.textContent = Math.floor(current);
+                    }
+                }, 20);
+            });
+        }
+
+        // Анимација при скролување
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        // Редирекција кон прашалници
+        function redirectToQuestionnaire(months) {
+            {% if user.is_authenticated and user.role == 'parent' %}
+                // Ако е најавен родител, пренасочи кон прашалникот
+                window.location.href = `/prasalnici/${months}/`;
+            {% else %}
+                // Ако не е најавен, пренасочи кон регистрација
+                window.location.href = "{% url 'register' %}";
+            {% endif %}
+        }
+
+        // Промена на навигацијата при скролување
+        function updateNavbar() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.style.padding = '10px 0';
+                navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            } else {
+                navbar.style.padding = '15px 0';
+                navbar.style.boxShadow = 'none';
+            }
+        }
+
+        // Смути скрол за навигациски линкови
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Активирај активна класа за навигација
+        function setActiveNavLink() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 100)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Стартувај ги анимациите
+            setTimeout(animateCounters, 500);
+            animateOnScroll();
+
+            // Означи активен линк на почеток
+            setActiveNavLink();
+        });
+
+        window.addEventListener('scroll', function() {
+            updateNavbar();
+            animateOnScroll();
+            setActiveNavLink();
+        });
+
+        // Покажи pop-up за нови корисници
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                setTimeout(() => {
+                    alert('Добредојдовте во Развоен Систем! Вашата регистрација е успешна. Веќе можете да започнете со додавање на дете.');
+                }, 1000);
+            }
+        });
+
+        // Back to top копче
+        const backToTopButton = document.createElement('button');
+        backToTopButton.innerHTML = '<i class="bi bi-arrow-up"></i>';
+        backToTopButton.className = 'btn btn-primary position-fixed bottom-0 end-0 m-3 rounded-circle shadow';
+        backToTopButton.style.width = '50px';
+        backToTopButton.style.height = '50px';
+        backToTopButton.style.display = 'none';
+        backToTopButton.style.zIndex = '1000';
+        backToTopButton.onclick = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        document.body.appendChild(backToTopButton);
+
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                backToTopButton.style.display = 'block';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

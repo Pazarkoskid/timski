@@ -1,0 +1,701 @@
+{% extends 'base.html' %}
+
+{% block title %}Мој Панел - Родител{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Заглавие и welcome порака -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-house-heart text-primary me-2"></i>
+                        Добредојдовте, {{ user.first_name|default:user.username }}!
+                    </h1>
+                    <p class="text-muted mb-0">Вашиот панел за следење на развојот на вашето дете</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6 p-2">
+                        <i class="bi bi-person me-1"></i>
+                        Родител
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистики -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-people text-primary fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Мои деца</h5>
+                            <p class="display-6 mb-0">{{ children.count }}</p>
+                            <a href="{% url 'add_child' %}" class="small text-primary text-decoration-none">
+                                Додади дете <i class="bi bi-plus-circle"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-success border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-clipboard-check text-success fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Пополнети прашалници</h5>
+                            <p class="display-6 mb-0">{{ responses.count }}</p>
+                            <small class="text-muted">Вкупно одговори</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-hourglass-split text-warning fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Чекаат на преглед</h5>
+                            <p class="display-6 mb-0">{{ pending_count|default:"0" }}</p>
+                            <small class="text-muted">Од терапевт</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-info border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-star text-info fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Просечни поени</h5>
+                            <p class="display-6 mb-0">{{ average_points|default:"-" }}</p>
+                            <small class="text-muted">Од терапевт</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Деца -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people me-2"></i>
+                        Мои деца
+                    </h5>
+                    <a href="{% url 'add_child' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Додади дете
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if children %}
+                    <div class="row">
+                        {% for child in children %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100 child-card" 
+                                 data-child-id="{{ child.id }}"
+                                 onclick="window.location='#child-{{ child.id }}'"
+                                 style="cursor: pointer;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="card-title mb-1">
+                                                <i class="bi bi-person-circle me-2"></i>
+                                                {{ child.first_name }} {{ child.last_name }}
+                                            </h5>
+                                            <p class="card-text text-muted small mb-0">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                {{ child.birth_date|date:"d.m.Y" }}
+                                            </p>
+                                        </div>
+                                        <div class="avatar-circle bg-primary text-white">
+                                            {{ child.first_name|first|upper }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="child-info">
+                                        <div class="mb-2">
+                                            <span class="badge bg-info">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                {{ child.get_age_in_months }} месеци
+                                            </span>
+                                            {% if child.get_age_in_months <= 12 %}
+                                            <span class="badge bg-success ms-1">доенче</span>
+                                            {% elif child.get_age_in_months <= 36 %}
+                                            <span class="badge bg-warning ms-1">мало дете</span>
+                                            {% else %}
+                                            <span class="badge bg-primary ms-1">предучилишно</span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% with child_responses=child.responses.all %}
+                                        <div class="small text-muted">
+                                            <i class="bi bi-clipboard-data me-1"></i>
+                                            Пополнети прашалници: {{ child_responses.count }}
+                                        </div>
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0 text-end">
+                                    <button class="btn btn-outline-primary btn-sm start-quiz-btn"
+                                            data-child-id="{{ child.id }}"
+                                            data-child-age="{{ child.get_age_in_months }}">
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        Нов прашалник
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-people display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">Сè уште немате додадено деца</h4>
+                        <p class="text-muted mb-4">Додадете дете за да можете да пополнувате прашалници</p>
+                        <a href="{% url 'add_child' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus me-1"></i>
+                            Додади прво дете
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Избор на прашалник модал -->
+    <div class="modal fade" id="quizModal" tabindex="-1" aria-labelledby="quizModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="quizModalLabel">
+                        <i class="bi bi-clipboard-plus me-2"></i>
+                        Избери прашалник
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="childInfo" class="alert alert-info mb-4">
+                        <!-- Детето ќе се пополни со JavaScript -->
+                    </div>
+                    
+                    <div class="row" id="quizOptions">
+                        <!-- Опции за прашалници ќе се пополнат со JavaScript -->
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Важно:</strong> Изберете го прашалникот што одговара на возраста на вашето дете.
+                        Се препорачува да се користи прашалникот за најблиската возраст.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Откажи
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Одговори на прашалници -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clipboard-data me-2"></i>
+                        Историја на прашалници
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if responses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Дете</th>
+                                    <th>Прашалник</th>
+                                    <th>Датум</th>
+                                    <th>Статус</th>
+                                    <th>Поени</th>
+                                    <th>Акции</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for response in responses %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle-sm me-2">
+                                                {{ response.child.first_name|first|upper }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ response.child.first_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ response.child.get_age_in_months }} мес.</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{ response.questionnaire.title }}
+                                        <br>
+                                        <small class="text-muted">{{ response.questionnaire.months }} месеци</small>
+                                    </td>
+                                    <td>
+                                        <small>
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ response.created_at|date:"d.m.Y" }}
+                                            <br>
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ response.created_at|time:"H:i" }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if response.status == 'submitted' %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-hourglass me-1"></i>
+                                            Чека на преглед
+                                        </span>
+                                        {% elif response.status == 'reviewed' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Прегледано
+                                        </span>
+                                        {% elif response.status == 'completed' %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-flag me-1"></i>
+                                            Завршено
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if response.total_points %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                                                {% widthratio response.total_points 120 100 as percentage %}
+                                                <div class="progress-bar 
+                                                    {% if response.total_points >= 90 %}bg-success
+                                                    {% elif response.total_points >= 60 %}bg-info
+                                                    {% elif response.total_points >= 30 %}bg-warning
+                                                    {% else %}bg-danger{% endif %}" 
+                                                    style="width: {{ percentage }}%">
+                                                </div>
+                                            </div>
+                                            <span class="fw-bold">{{ response.total_points }}</span>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'response_detail' response.id %}" 
+                                               class="btn btn-outline-info"
+                                               data-bs-toggle="tooltip"
+                                               title="Преглед на одговори">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if response.therapist_comments %}
+                                            <button class="btn btn-outline-success"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#commentsModal{{ response.id }}"
+                                                    title="Коментари">
+                                                <i class="bi bi-chat-text"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Comments Modal -->
+                                <div class="modal fade" id="commentsModal{{ response.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    <i class="bi bi-chat-text me-2"></i>
+                                                    Коментари од терапевт
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if response.therapist_comments %}
+                                                <div class="p-3 bg-light rounded mb-3">
+                                                    <h6>Коментари:</h6>
+                                                    <p>{{ response.therapist_comments|linebreaks }}</p>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if response.total_points %}
+                                                <div class="alert alert-info">
+                                                    <i class="bi bi-star me-2"></i>
+                                                    Вкупно поени: <strong>{{ response.total_points }}</strong>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Затвори
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">Сè уште немате пополнето прашалници</h4>
+                        <p class="text-muted mb-4">Започнете со пополнување на прашалник за вашето дете</p>
+                        {% if children %}
+                        <button class="btn btn-primary btn-lg" id="startFirstQuiz">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Започни прв прашалник
+                        </button>
+                        {% else %}
+                        <a href="{% url 'add_child' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-plus me-1"></i>
+                            Додади дете прво
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .avatar-circle-sm {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        background-color: #e9ecef;
+        color: #495057;
+    }
+    
+    .dashboard-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .child-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .child-card:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.1);
+        transform: translateY(-3px);
+    }
+    
+    .progress {
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        font-weight: 500;
+        padding: 5px 10px;
+    }
+    
+    .quiz-option {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .quiz-option:hover {
+        border-color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    .quiz-option.selected {
+        border-color: #198754;
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Иницијализирај tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => {
+        new bootstrap.Tooltip(tooltip);
+    });
+    
+    // Функционалност за избор на прашалник
+    const startQuizBtns = document.querySelectorAll('.start-quiz-btn');
+    const quizModal = new bootstrap.Modal(document.getElementById('quizModal'));
+    const childInfoDiv = document.getElementById('childInfo');
+    const quizOptionsDiv = document.getElementById('quizOptions');
+    const startFirstQuizBtn = document.getElementById('startFirstQuiz');
+    
+    // Листа на достапни прашалници (месеци)
+    const availableQuizzes = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 27, 33, 42, 48, 54, 60];
+    
+    let selectedChildId = null;
+    let selectedChildAge = null;
+    let selectedQuizMonths = null;
+    
+    // Функција за прикажување на модал за избор на прашалник
+    function showQuizModal(childId, childAge, childName) {
+        selectedChildId = childId;
+        selectedChildAge = childAge;
+        
+        // Пополни информации за детето
+        childInfoDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="avatar-circle bg-primary text-white me-3">
+                    ${childName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h6 class="mb-0">Прашалник за: <strong>${childName}</strong></h6>
+                    <p class="mb-0">Возраст: <strong>${childAge} месеци</strong></p>
+                </div>
+            </div>
+        `;
+        
+        // Пополни опции за прашалници
+        quizOptionsDiv.innerHTML = '';
+        
+        // Најди ги препорачаните прашалници
+        const recommendedQuizzes = availableQuizzes.filter(months => 
+            Math.abs(months - childAge) <= 6
+        );
+        
+        // Сортирај по разлика во возраст
+        recommendedQuizzes.sort((a, b) => {
+            return Math.abs(a - childAge) - Math.abs(b - childAge);
+        });
+        
+        if (recommendedQuizzes.length > 0) {
+            // Препорачани прашалници
+            quizOptionsDiv.innerHTML += `
+                <div class="col-12 mb-3">
+                    <h6 class="text-success mb-2">
+                        <i class="bi bi-stars me-1"></i>
+                        Препорачани прашалници:
+                    </h6>
+                </div>
+            `;
+            
+            recommendedQuizzes.forEach(months => {
+                const difference = months - childAge;
+                let statusText = '';
+                let statusClass = '';
+                
+                if (difference === 0) {
+                    statusText = 'Точна возраст';
+                    statusClass = 'text-success';
+                } else if (difference > 0) {
+                    statusText = `${Math.abs(difference)} месеци понапред`;
+                    statusClass = 'text-info';
+                } else {
+                    statusText = `${Math.abs(difference)} месеци порано`;
+                    statusClass = 'text-warning';
+                }
+                
+                quizOptionsDiv.innerHTML += `
+                    <div class="col-md-6 mb-2">
+                        <div class="quiz-option" data-months="${months}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Прашалник за ${months} месеци</h6>
+                                    <small class="${statusClass}">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        ${statusText}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-primary btn-sm select-quiz-btn" data-months="${months}">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        Избери
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Други достапни прашалници
+            const otherQuizzes = availableQuizzes.filter(months => 
+                Math.abs(months - childAge) > 6
+            );
+            
+            if (otherQuizzes.length > 0) {
+                quizOptionsDiv.innerHTML += `
+                    <div class="col-12 mb-3 mt-4">
+                        <h6 class="text-muted mb-2">
+                            <i class="bi bi-grid me-1"></i>
+                            Други прашалници:
+                        </h6>
+                    </div>
+                `;
+                
+                otherQuizzes.forEach(months => {
+                    quizOptionsDiv.innerHTML += `
+                        <div class="col-md-4 mb-2">
+                            <div class="quiz-option border-dashed" data-months="${months}">
+                                <div class="text-center">
+                                    <h6 class="mb-1">${months} месеци</h6>
+                                    <button class="btn btn-outline-secondary btn-sm select-quiz-btn" data-months="${months}">
+                                        Избери
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        } else {
+            // Ако нема препорачани прашалници
+            quizOptionsDiv.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <i class="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+                    <h5 class="text-warning">Нема препорачани прашалници</h5>
+                    <p class="text-muted">Возраста на вашето дете е надвор од опсегот на достапните прашалници.</p>
+                    <p class="text-muted">Ве молиме контактирајте го терапевтот.</p>
+                </div>
+            `;
+        }
+        
+        // Додади event listeners за избор на прашалник
+        document.querySelectorAll('.select-quiz-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                selectedQuizMonths = this.getAttribute('data-months');
+                
+                // Води до страницата за прашалник
+                window.location.href = `/prasalnici/${selectedQuizMonths}/`;
+            });
+        });
+        
+        // Отвори го модалот
+        quizModal.show();
+    }
+    
+    // Додади event listeners за копчињата за нов прашалник
+    startQuizBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Спречи event bubbling до родителот
+            const childId = this.getAttribute('data-child-id');
+            const childAge = parseInt(this.getAttribute('data-child-age'));
+            const childName = this.closest('.child-card').querySelector('.card-title').textContent.trim();
+            
+            showQuizModal(childId, childAge, childName);
+        });
+    });
+    
+    // Копче за започнување на прв прашалник
+    if (startFirstQuizBtn) {
+        startFirstQuizBtn.addEventListener('click', function() {
+            const firstChild = document.querySelector('.child-card');
+            if (firstChild) {
+                const childId = firstChild.getAttribute('data-child-id');
+                const childAge = parseInt(firstChild.querySelector('.start-quiz-btn').getAttribute('data-child-age'));
+                const childName = firstChild.querySelector('.card-title').textContent.trim();
+                
+                showQuizModal(childId, childAge, childName);
+            }
+        });
+    }
+    
+    // Овозможи клик на целите картички за децата
+    document.querySelectorAll('.child-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const childId = this.getAttribute('data-child-id');
+            // Може да се имплементира навигација до детални информации за детето
+            console.log('Кликнато на дете со ID:', childId);
+        });
+    });
+    
+    // Анимација за успешно додадено дете
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('child_added')) {
+        setTimeout(() => {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Детето е успешно додадено! Сега можете да пополните прашалник.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }, 500);
+    }
+    
+    // Автоматско скролување до децата ако има ново додадено дете
+    if (urlParams.get('scroll_to') === 'children' && document.querySelector('.child-card')) {
+        setTimeout(() => {
+            document.querySelector('.child-card').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }, 300);
+    }
+});
+</script>
+{% endblock %}

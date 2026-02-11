@@ -1,0 +1,722 @@
+{% extends 'base.html' %}
+
+{% block title %}Терапевтски Панел - Развоен Систем{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Заглавие и статус -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="bi bi-clipboard-check text-primary me-2"></i>
+                        Терапевтски Панел
+                    </h1>
+                    <p class="text-muted mb-0">Преглед и оценување на одговори од родители</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6 p-2">
+                        <i class="bi bi-person-badge me-1"></i>
+                        Терапевт
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистики -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-hourglass-split text-primary fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Чекаат на преглед</h5>
+                            <p class="display-6 mb-0">{{ pending_responses.count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-success border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle text-success fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Прегледани</h5>
+                            <p class="display-6 mb-0">{{ reviewed_responses.count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-info border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-people text-info fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Вкупно деца</h5>
+                            {% with unique_children=unique_children_count %}
+                            <p class="display-6 mb-0">{{ unique_children|default:"0" }}</p>
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-clipboard-data text-warning fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Вкупно прашалници</h5>
+                            <p class="display-6 mb-0">{{ total_responses|default:"0" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таб мени -->
+    <ul class="nav nav-tabs mb-4" id="therapistTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" 
+                    data-bs-target="#pending" type="button" role="tab">
+                <i class="bi bi-hourglass-split me-1"></i>
+                Чекаат на преглед
+                <span class="badge bg-danger ms-1">{{ pending_responses.count }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reviewed-tab" data-bs-toggle="tab" 
+                    data-bs-target="#reviewed" type="button" role="tab">
+                <i class="bi bi-check-circle me-1"></i>
+                Прегледани
+                <span class="badge bg-success ms-1">{{ reviewed_responses.count }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="search-tab" data-bs-toggle="tab" 
+                    data-bs-target="#search" type="button" role="tab">
+                <i class="bi bi-search me-1"></i>
+                Пребарај
+            </button>
+        </li>
+    </ul>
+
+    <!-- Таб содржина -->
+    <div class="tab-content" id="therapistTabContent">
+        <!-- Чекаат на преглед -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            {% if pending_responses %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Дете</th>
+                            <th>Возраст</th>
+                            <th>Прашалник</th>
+                            <th>Родител</th>
+                            <th>Датум</th>
+                            <th>Акции</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in pending_responses %}
+                        <tr class="{% if forloop.counter|divisibleby:2 %}table-light{% endif %}">
+                            <td class="fw-bold">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle text-primary me-2"></i>
+                                    <div>
+                                        <strong>{{ response.child.first_name }} {{ response.child.last_name }}</strong>
+                                        {% if response.child.get_age_in_months %}
+                                        <br>
+                                        <small class="text-muted">{{ response.child.birth_date|date:"d.m.Y" }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ response.child.get_age_in_months }} месеци
+                                </span>
+                            </td>
+                            <td>
+                                <i class="bi bi-clipboard me-1"></i>
+                                {{ response.questionnaire.title }}
+                                <br>
+                                <small class="text-muted">{{ response.questionnaire.months }} месеци</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person text-secondary me-2"></i>
+                                    <div>
+                                        {{ response.parent.get_full_name|default:response.parent.username }}
+                                        <br>
+                                        <small class="text-muted">{{ response.parent.email|default:"Без е-пошта" }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small>
+                                    <i class="bi bi-calendar me-1"></i>
+                                    {{ response.created_at|date:"d.m.Y" }}
+                                    <br>
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ response.created_at|time:"H:i" }}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'therapist_response' response.id %}" 
+                                       class="btn btn-primary btn-sm" 
+                                       data-bs-toggle="tooltip" 
+                                       title="Одговори на прашалникот">
+                                        <i class="bi bi-pencil-square"></i>
+                                        Оцени
+                                    </a>
+                                    <a href="{% url 'response_detail' response.id %}" 
+                                       class="btn btn-outline-info btn-sm"
+                                       data-bs-toggle="tooltip"
+                                       title="Прегледај детали">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-check2-all display-1 text-success mb-3"></i>
+                <h3 class="text-success">Браво! Нема одговори кои чекаат на преглед.</h3>
+                <p class="text-muted">Сите одговори од родителите се прегледани и оценети.</p>
+                <a href="#reviewed" class="btn btn-outline-success mt-2" data-bs-toggle="tab">
+                    <i class="bi bi-arrow-right-circle me-1"></i>
+                    Види ги прегледаните одговори
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Прегледани -->
+        <div class="tab-pane fade" id="reviewed" role="tabpanel">
+            {% if reviewed_responses %}
+            <div class="mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchReviewed" 
+                               placeholder="Пребарај по дете, родител или прашалник...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="filterAge">
+                            <option value="">Сите возрасти</option>
+                            <option value="0-12">0-12 месеци</option>
+                            <option value="13-24">13-24 месеци</option>
+                            <option value="25-36">25-36 месеци</option>
+                            <option value="37-60">37-60 месеци</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="filterPoints">
+                            <option value="">Сите поени</option>
+                            <option value="0-30">0-30 поени</option>
+                            <option value="31-60">31-60 поени</option>
+                            <option value="61-90">61-90 поени</option>
+                            <option value="91-120">91-120 поени</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" id="resetFilters">
+                            <i class="bi bi-arrow-counterclockwise"></i> Ресетирај
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="reviewedTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Дете</th>
+                            <th>Возраст</th>
+                            <th>Прашалник</th>
+                            <th>Вкупно поени</th>
+                            <th>Датум на оценка</th>
+                            <th>Статус</th>
+                            <th>Акции</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for response in reviewed_responses %}
+                        <tr data-age="{{ response.child.get_age_in_months }}" 
+                            data-points="{{ response.total_points }}"
+                            data-search="{{ response.child.first_name }} {{ response.child.last_name }} {{ response.parent.get_full_name }} {{ response.questionnaire.title }}">
+                            <td class="fw-bold">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-2">
+                                        <i class="bi bi-person-circle text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <strong>{{ response.child.first_name }} {{ response.child.last_name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ response.parent.get_full_name|default:response.parent.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ response.child.get_age_in_months }} мес.
+                                </span>
+                            </td>
+                            <td>
+                                <i class="bi bi-clipboard me-1"></i>
+                                {{ response.questionnaire.title }}
+                            </td>
+                            <td>
+                                {% if response.total_points %}
+                                <div class="progress" style="height: 20px; width: 100px;">
+                                    {% widthratio response.total_points 120 100 as percentage %}
+                                    <div class="progress-bar 
+                                        {% if response.total_points >= 90 %}bg-success
+                                        {% elif response.total_points >= 60 %}bg-info
+                                        {% elif response.total_points >= 30 %}bg-warning
+                                        {% else %}bg-danger{% endif %}" 
+                                        role="progressbar" 
+                                        style="width: {{ percentage }}%">
+                                        <span class="fw-bold">{{ response.total_points }}</span>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="badge bg-secondary">Неоценето</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    {{ response.updated_at|date:"d.m.Y" }}
+                                    <br>
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ response.updated_at|time:"H:i" }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if response.status == 'reviewed' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Прегледано
+                                </span>
+                                {% elif response.status == 'completed' %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-flag me-1"></i>
+                                    Завршено
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-hourglass me-1"></i>
+                                    {{ response.get_status_display }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'response_detail' response.id %}" 
+                                       class="btn btn-info"
+                                       data-bs-toggle="tooltip"
+                                       title="Детали за одговорот">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'therapist_response' response.id %}" 
+                                       class="btn btn-warning"
+                                       data-bs-toggle="tooltip"
+                                       title="Измени оценка">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-success"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#commentsModal{{ response.id }}"
+                                            title="Коментари">
+                                        <i class="bi bi-chat-text"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Comments Modal -->
+                        <div class="modal fade" id="commentsModal{{ response.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            Коментари за {{ response.child.first_name }}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% if response.therapist_comments %}
+                                        <div class="mb-3">
+                                            <h6>Ваши коментари:</h6>
+                                            <div class="p-3 bg-light rounded">
+                                                {{ response.therapist_comments|linebreaks }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if response.notes %}
+                                        <div>
+                                            <h6>Забелешки од родителот:</h6>
+                                            <div class="p-3 bg-light rounded">
+                                                {{ response.notes|linebreaks }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Затвори
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-clipboard display-1 text-muted mb-3"></i>
+                <h3 class="text-muted">Сè уште нема прегледани одговори</h3>
+                <p class="text-muted">Кога ќе оцените одговори од родители, тие ќе се појават овде.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Пребарај -->
+        <div class="tab-pane fade" id="search" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-search me-2"></i>
+                        Напредно пребарување
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="searchForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="searchChild" class="form-label">Име на дете:</label>
+                                <input type="text" class="form-control" id="searchChild" 
+                                       placeholder="Внесете име на дете...">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="searchParent" class="form-label">Име на родител:</label>
+                                <input type="text" class="form-control" id="searchParent" 
+                                       placeholder="Внесете име на родител...">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchAgeFrom" class="form-label">Возраст од:</label>
+                                <input type="number" class="form-control" id="searchAgeFrom" 
+                                       placeholder="0" min="0" max="60">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchAgeTo" class="form-label">Возраст до:</label>
+                                <input type="number" class="form-control" id="searchAgeTo" 
+                                       placeholder="60" min="0" max="60">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchQuestionnaire" class="form-label">Прашалник:</label>
+                                <select class="form-control" id="searchQuestionnaire">
+                                    <option value="">Сите прашалници</option>
+                                    {% for months in age_months %}
+                                    <option value="{{ months }}">{{ months }} месеци</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchDateFrom" class="form-label">Датум од:</label>
+                                <input type="date" class="form-control" id="searchDateFrom">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchDateTo" class="form-label">Датум до:</label>
+                                <input type="date" class="form-control" id="searchDateTo">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="searchStatus" class="form-label">Статус:</label>
+                                <select class="form-control" id="searchStatus">
+                                    <option value="">Сите статуси</option>
+                                    <option value="submitted">Поднесено</option>
+                                    <option value="reviewed">Одговорено</option>
+                                    <option value="completed">Завршено</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-secondary" id="clearSearch">
+                                        <i class="bi bi-x-circle me-1"></i> Исчисти
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="performSearch">
+                                        <i class="bi bi-search me-1"></i> Пребарај
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="searchResults" class="mt-4" style="display: none;">
+                <h5 class="mb-3">Резултати од пребарувањето:</h5>
+                <div id="resultsContainer" class="table-responsive">
+                    <!-- Резултатите ќе се вчитаат овде со JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 36px;
+        height: 36px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .dashboard-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .nav-tabs .nav-link {
+        font-weight: 500;
+        padding: 12px 20px;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #f8f9fa;
+        border-bottom-color: #f8f9fa;
+    }
+    
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        font-weight: 500;
+        padding: 5px 10px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Иницијализирај tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => {
+        new bootstrap.Tooltip(tooltip);
+    });
+    
+    // Филтрирање на прегледани
+    const searchReviewed = document.getElementById('searchReviewed');
+    const filterAge = document.getElementById('filterAge');
+    const filterPoints = document.getElementById('filterPoints');
+    const resetFilters = document.getElementById('resetFilters');
+    
+    function filterReviewedTable() {
+        const searchText = searchReviewed.value.toLowerCase();
+        const ageFilter = filterAge.value;
+        const pointsFilter = filterPoints.value;
+        
+        const rows = document.querySelectorAll('#reviewedTable tbody tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const searchData = row.getAttribute('data-search').toLowerCase();
+            const age = parseInt(row.getAttribute('data-age'));
+            const points = parseInt(row.getAttribute('data-points'));
+            let shouldShow = true;
+            
+            // Филтер по текст
+            if (searchText && !searchData.includes(searchText)) {
+                shouldShow = false;
+            }
+            
+            // Филтер по возраст
+            if (ageFilter) {
+                const [min, max] = ageFilter.split('-').map(Number);
+                if (age < min || age > max) {
+                    shouldShow = false;
+                }
+            }
+            
+            // Филтер по поени
+            if (pointsFilter) {
+                const [min, max] = pointsFilter.split('-').map(Number);
+                if (points < min || points > max) {
+                    shouldShow = false;
+                }
+            }
+            
+            // Прикажи/скриј ред
+            row.style.display = shouldShow ? '' : 'none';
+            if (shouldShow) {
+                visibleCount++;
+                // Промени го бројот во првата колона
+                const counterCell = row.querySelector('td:first-child');
+                counterCell.textContent = visibleCount;
+            }
+        });
+    }
+    
+    if (searchReviewed) {
+        searchReviewed.addEventListener('input', filterReviewedTable);
+    }
+    
+    if (filterAge) {
+        filterAge.addEventListener('change', filterReviewedTable);
+    }
+    
+    if (filterPoints) {
+        filterPoints.addEventListener('change', filterReviewedTable);
+    }
+    
+    if (resetFilters) {
+        resetFilters.addEventListener('click', function() {
+            searchReviewed.value = '';
+            filterAge.value = '';
+            filterPoints.value = '';
+            filterReviewedTable();
+        });
+    }
+    
+    // Напредно пребарување
+    const searchForm = document.getElementById('searchForm');
+    const clearSearch = document.getElementById('clearSearch');
+    const performSearch = document.getElementById('performSearch');
+    const searchResults = document.getElementById('searchResults');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchForm.reset();
+            searchResults.style.display = 'none';
+        });
+    }
+    
+    if (performSearch) {
+        performSearch.addEventListener('click', async function() {
+            // Во реален систем, ова би праќало AJAX request до серверот
+            // Ова е само пример за UI
+            
+            // Прикажи анимација за вчитување
+            resultsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Вчитување...</span>
+                    </div>
+                    <p class="mt-3">Вчитување резултати...</p>
+                </div>
+            `;
+            
+            searchResults.style.display = 'block';
+            
+            // Симулирај API повик
+            setTimeout(() => {
+                // Во реална имплементација, ова би било response од серверот
+                resultsContainer.innerHTML = `
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Дете</th>
+                                <th>Возраст</th>
+                                <th>Прашалник</th>
+                                <th>Статус</th>
+                                <th>Датум</th>
+                                <th>Акции</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="bi bi-info-circle text-primary me-2"></i>
+                                    За да функционира пребарувањето, потребно е да се имплементира серверски endpoint.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+            }, 1000);
+        });
+    }
+    
+    // Автоматско отворање на таб според URL параметар
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab) {
+        const tabElement = document.querySelector(`#${tab}-tab`);
+        if (tabElement) {
+            const tabInstance = new bootstrap.Tab(tabElement);
+            tabInstance.show();
+        }
+    }
+    
+    // Автоматско рефреш на страницата секои 30 секунди за нови одговори
+    setTimeout(() => {
+        const activeTab = document.querySelector('#therapistTabs .nav-link.active');
+        if (activeTab && activeTab.id === 'pending-tab') {
+            // Само ако сме на pending табот
+            window.location.reload();
+        }
+    }, 30000); // 30 секунди
+});
+</script>
+{% endblock %}

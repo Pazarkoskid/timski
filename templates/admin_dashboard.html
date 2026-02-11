@@ -1,0 +1,594 @@
+{% extends 'base.html' %}
+
+{% block title %}Администраторски Панел{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Заглавие -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-1">
+                        <i class="bi bi-speedometer2 text-primary me-2"></i>
+                        Администраторски Панел
+                    </h1>
+                    <p class="text-muted mb-0">Управување со системот и корисниците</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-danger fs-6 p-2">
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Администратор
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистики -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-people text-primary fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Вкупно корисници</h5>
+                            <p class="display-6 mb-0">{{ users.count }}</p>
+                            <small class="text-muted">Сите корисници</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-success border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-person-check text-success fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Родители</h5>
+                            <p class="display-6 mb-0">{{ parent_count|default:"0" }}</p>
+                            <small class="text-muted">Активни родители</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-heart-pulse text-warning fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Терапевти</h5>
+                            <p class="display-6 mb-0">{{ therapist_count|default:"0" }}</p>
+                            <small class="text-muted">Активни терапевти</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-info border-2 dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-clipboard-data text-info fs-1"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">Прашалници</h5>
+                            <p class="display-6 mb-0">{{ responses.count }}</p>
+                            <small class="text-muted">Вкупно одговори</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Таб мени -->
+    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="users-tab" data-bs-toggle="tab" 
+                    data-bs-target="#users" type="button" role="tab">
+                <i class="bi bi-people me-1"></i>
+                Корисници
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="responses-tab" data-bs-toggle="tab" 
+                    data-bs-target="#responses" type="button" role="tab">
+                <i class="bi bi-clipboard-data me-1"></i>
+                Прашалници
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="system-tab" data-bs-toggle="tab" 
+                    data-bs-target="#system" type="button" role="tab">
+                <i class="bi bi-gear me-1"></i>
+                Систем
+            </button>
+        </li>
+    </ul>
+
+    <!-- Таб содржина -->
+    <div class="tab-content" id="adminTabContent">
+        <!-- Корисници -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-people me-2"></i>
+                                Управување со корисници
+                            </h5>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                <i class="bi bi-person-plus me-1"></i>
+                                Додади корисник
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Корисничко име</th>
+                                            <th>Име и презиме</th>
+                                            <th>Е-пошта</th>
+                                            <th>Улога</th>
+                                            <th>Датум на регистрација</th>
+                                            <th>Статус</th>
+                                            <th>Акции</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in users %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <strong>{{ user.username }}</strong>
+
+                                            </td>
+                                            <td>{{ user.get_full_name|default:"-" }}</td>
+                                            <td>{{ user.email|default:"-" }}</td>
+                                            <td>
+                                                {% if user.role == 'admin' %}
+                                                <span class="badge bg-danger">Администратор</span>
+                                                {% elif user.role == 'therapist' %}
+                                                <span class="badge bg-warning">Терапевт</span>
+                                                {% elif user.role == 'parent' %}
+                                                <span class="badge bg-success">Родител</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    {{ user.date_joined|date:"d.m.Y" }}
+                                                    <br>
+                                                    {{ user.date_joined|time:"H:i" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {% if user.is_active %}
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                    Активен
+                                                </span>
+                                                {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="bi bi-x-circle me-1"></i>
+                                                    Неактивен
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-info"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#editUserModal{{ user.id }}">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    {% if user != request.user %}
+                                                    <button class="btn btn-outline-danger"
+                                                            onclick="confirmDeleteUser('{{ user.id }}', '{{ user.username }}')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Прашалници -->
+        <div class="tab-pane fade" id="responses" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clipboard-data me-2"></i>
+                                Сите прашалници
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Дете</th>
+                                            <th>Родител</th>
+                                            <th>Прашалник</th>
+                                            <th>Датум</th>
+                                            <th>Статус</th>
+                                            <th>Поени</th>
+                                            <th>Акции</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for response in responses %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <strong>{{ response.child.first_name }} {{ response.child.last_name }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ response.child.get_age_in_months }} мес.</small>
+                                            </td>
+                                            <td>
+                                                {{ response.parent.get_full_name|default:response.parent.username }}
+                                            </td>
+                                            <td>
+                                                {{ response.questionnaire.title }}
+                                                <br>
+                                                <small class="text-muted">{{ response.questionnaire.months }} месеци</small>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    {{ response.created_at|date:"d.m.Y" }}
+                                                    <br>
+                                                    {{ response.created_at|time:"H:i" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {% if response.status == 'submitted' %}
+                                                <span class="badge bg-warning">Чека на преглед</span>
+                                                {% elif response.status == 'reviewed' %}
+                                                <span class="badge bg-success">Прегледано</span>
+                                                {% elif response.status == 'completed' %}
+                                                <span class="badge bg-primary">Завршено</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if response.total_points %}
+                                                <span class="badge bg-info">{{ response.total_points }}</span>
+                                                {% else %}
+                                                <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'response_detail' response.id %}"
+                                                       class="btn btn-outline-info"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Детали">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-outline-warning"
+                                                       data-bs-toggle="tooltip"
+                                                       title="Измени статус">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Систем -->
+        <div class="tab-pane fade" id="system" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-database me-2"></i>
+                                Статистики на системот
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Вкупно деца во системот</span>
+                                    <span class="badge bg-primary rounded-pill">{{ total_children|default:"0" }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Просечна возраст на деца</span>
+                                    <span class="badge bg-info rounded-pill">{{ avg_child_age|default:"0" }} мес.</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Најчест прашалник</span>
+                                    <span class="badge bg-success rounded-pill">{{ most_common_quiz|default:"-" }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Најактивен родител</span>
+                                    <span class="badge bg-warning rounded-pill">{{ most_active_parent|default:"-" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-gear me-2"></i>
+                                Системски нагодувања
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="systemSettingsForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Автоматско рефреш на прегледи (секунди)</label>
+                                    <input type="number" class="form-control" value="30" min="10" max="300">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Максимални поени по прашалник</label>
+                                    <input type="number" class="form-control" value="120" min="10" max="500">
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="emailNotifications" checked>
+                                    <label class="form-check-label" for="emailNotifications">
+                                        Имајл известувања
+                                    </label>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="autoBackup" checked>
+                                    <label class="form-check-label" for="autoBackup">
+                                        Автоматско бекапирање
+                                    </label>
+                                </div>
+                                <button type="button" class="btn btn-primary w-100">
+                                    <i class="bi bi-save me-1"></i>
+                                    Зачувај нагодувања
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-tools me-2"></i>
+                                Административни акции
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#backupModal">
+                                        <i class="bi bi-download me-1"></i>
+                                        Бекап на податоци
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-outline-success w-100" onclick="runSystemCheck()">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Проверка на системот
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#maintenanceModal">
+                                        <i class="bi bi-wrench me-1"></i>
+                                        Одржување
+                                    </button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-outline-danger w-100" onclick="clearCache()">
+                                        <i class="bi bi-trash me-1"></i>
+                                        Исчисти кеш
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addUserModalLabel">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Додади нов корисник
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Корисничко име *</label>
+                            <input type="text" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Улога *</label>
+                            <select class="form-control" required>
+                                <option value="">Избери улога</option>
+                                <option value="parent">Родител</option>
+                                <option value="therapist">Терапевт</option>
+                                <option value="admin">Администратор</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Име</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Презиме</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Е-пошта *</label>
+                            <input type="email" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Лозинка *</label>
+                            <input type="password" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Потврди лозинка *</label>
+                            <input type="password" class="form-control" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Откажи</button>
+                <button type="button" class="btn btn-primary" onclick="addNewUser()">Зачувај корисник</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .nav-tabs .nav-link {
+        font-weight: 500;
+        padding: 12px 20px;
+    }
+
+    .nav-tabs .nav-link.active {
+        background-color: #f8f9fa;
+        border-bottom-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 0.85em;
+        font-weight: 500;
+        padding: 5px 10px;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Иницијализирај tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => {
+        new bootstrap.Tooltip(tooltip);
+    });
+
+    // Потврда за бришење на корисник
+    window.confirmDeleteUser = function(userId, username) {
+        if (confirm(`Дали сте сигурни дека сакате да го избришете корисникот "${username}"?`)) {
+            // Во реална имплементација, ова би праќало AJAX request
+            alert(`Корисникот ${username} би бил избришан. (Во реална имплементација)`);
+        }
+    };
+
+    // Додавање на нов корисник
+    window.addNewUser = function() {
+        // Валидација на формата
+        const form = document.getElementById('addUserForm');
+        const inputs = form.querySelectorAll('input[required], select[required]');
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                isValid = false;
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+
+        if (isValid) {
+            // Во реална имплементација, ова би праќало AJAX request
+            alert('Новиот корисник би бил зачуван. (Во реална имплементација)');
+            bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+        }
+    };
+
+    // Проверка на системот
+    window.runSystemCheck = function() {
+        alert('Проверката на системот е започната. Резултатите ќе се прикажат во конзола.');
+        // Симулирај проверка
+        setTimeout(() => {
+            console.log('Системска проверка завршена.');
+            alert('Проверката заврши успешно. Системот функционира нормално.');
+        }, 1500);
+    };
+
+    // Исчисти кеш
+    window.clearCache = function() {
+        if (confirm('Дали сте сигурни дека сакате да го исчистите кешот на системот?')) {
+            alert('Кешот е исчистен.');
+        }
+    };
+
+    // Аутоматско отворање на таб според URL параметар
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab) {
+        const tabElement = document.querySelector(`#${tab}-tab`);
+        if (tabElement) {
+            const tabInstance = new bootstrap.Tab(tabElement);
+            tabInstance.show();
+        }
+    }
+});
+</script>
+{% endblock %}
