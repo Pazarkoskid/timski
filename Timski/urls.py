@@ -26,4 +26,6 @@ urlpatterns = [
     
     # Заеднички
     path('response/<int:response_id>/', views.response_detail, name='response_detail'),
+
+    path('export/response/<int:response_id>/pdf/', views.export_response_pdf, name='export_response_pdf'),
 ]

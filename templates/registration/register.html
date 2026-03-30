@@ -17,10 +17,9 @@
 
                     <form method="post" id="registerForm">
                         {% csrf_token %}
-                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="id_username" class="form-label">
+                                <label form="id_username" class="form-label">
                                     <i class="bi bi-person-circle"></i> Корисничко име *
                                 </label>
                                 {{ form.username }}
@@ -35,7 +34,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="id_email" class="form-label">
+                                <label form="id_email" class="form-label">
                                     <i class="bi bi-envelope"></i> Е-пошта *
                                 </label>
                                 {{ form.email }}
@@ -51,14 +50,14 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="id_first_name" class="form-label">
+                                <label form="id_first_name" class="form-label">
                                     <i class="bi bi-person"></i> Име
                                 </label>
                                 {{ form.first_name }}
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="id_last_name" class="form-label">
+                                <label form="id_last_name" class="form-label">
                                     <i class="bi bi-person"></i> Презиме
                                 </label>
                                 {{ form.last_name }}
@@ -67,7 +66,7 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="id_password1" class="form-label">
+                                <label form="id_password1" class="form-label">
                                     <i class="bi bi-lock"></i> Лозинка *
                                 </label>
                                 {{ form.password1 }}
@@ -81,7 +80,7 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="id_password2" class="form-label">
+                                <label form="id_password2" class="form-label">
                                     <i class="bi bi-lock-fill"></i> Потврди лозинка *
                                 </label>
                                 {{ form.password2 }}
@@ -97,14 +96,14 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="id_phone" class="form-label">
+                                <label form="id_phone" class="form-label">
                                     <i class="bi bi-telephone"></i> Телефон
                                 </label>
                                 {{ form.phone }}
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="id_date_of_birth" class="form-label">
+                                <label form="id_date_of_birth" class="form-label">
                                     <i class="bi bi-calendar"></i> Датум на раѓање
                                 </label>
                                 {{ form.date_of_birth }}
@@ -118,7 +117,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="termsCheck" required>
                                 <label class="form-check-label" for="termsCheck">
-                                    Се согласувам со 
+                                    Се согласувам со
                                     <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">условите за користење</a>
                                 </label>
                             </div>
@@ -208,25 +207,25 @@ document.addEventListener('DOMContentLoaded', function() {
             field.classList.add('form-check-input');
         }
     });
-    
+
     // Password strength indicator
     const password1 = document.getElementById('id_password1');
     const password2 = document.getElementById('id_password2');
     const strengthDiv = document.createElement('div');
     strengthDiv.className = 'mt-1 small';
     password1.parentNode.appendChild(strengthDiv);
-    
+
     password1.addEventListener('input', function() {
         const password = this.value;
         let strength = 0;
         let message = '';
         let color = 'danger';
-        
+
         if (password.length >= 8) strength++;
         if (/[A-Z]/.test(password)) strength++;
         if (/[0-9]/.test(password)) strength++;
         if (/[^A-Za-z0-9]/.test(password)) strength++;
-        
+
         switch(strength) {
             case 0:
             case 1:
@@ -246,10 +245,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 color = 'success';
                 break;
         }
-        
+
         strengthDiv.innerHTML = `<span class="text-${color}">${message}</span>`;
     });
-    
+
     // Confirm password check
     password2.addEventListener('input', function() {
         if (password1.value !== password2.value && password2.value !== '') {

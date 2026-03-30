@@ -4,15 +4,24 @@ from .models import CustomUser, Child
 
 
 class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(max_length=30, required=False)
+    last_name = forms.CharField(max_length=30, required=False)
+    phone = forms.CharField(max_length=20, required=False)
+
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'first_name', 'last_name', 'role', 'phone', 'date_of_birth')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # При регистрација, секогаш Parent
-        self.fields['role'].initial = 'parent'
-        self.fields['role'].widget = forms.HiddenInput()
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data.get('first_name', '')
+        user.last_name = self.cleaned_data.get('last_name', '')
+        user.phone = self.cleaned_data.get('phone', '')
+        if commit:
+            user.save()
+        return user
 
 
 class ChildForm(forms.ModelForm):

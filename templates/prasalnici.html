@@ -1,48 +1,136 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ quiz.title }}</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-</head>
-<body>
+{% extends 'base.html' %}
 
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01"
-                aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-            <a class="navbar-brand" href="#">PROJECT</a>
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="/">Questions</a>
-                </li>
+{% block title %}Детали за одговорот - Развоен Систем{% endblock %}
 
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Answers</a>
-                </li>
-            </ul>
-            <div class="d-flex gap-2">
-                {% if request.user.is_authenticated %}
-                    <span class="navbar-text me-2">{{ request.user.username }}</span>
+{% block content %}
 
-                    <form method="post" action="{% url 'logout' %}" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-success">Logout</button>
-                    </form>
-                {% else %}
-                    <a class="btn btn-outline-success" href="{% url 'login' %}">Login</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</nav>
+<style>
+    /* Основни бои */
+    :root {
+        --primary-blue: #1e90ff;
+        --light-blue: #e6f2ff;
+        --dark-blue: #0a4d8c;
+        --card-bg: #f9fbff;
+    }
 
-<div class="container mt-4">
+    h1, h2 {
+        color: var(--dark-blue);
+    }
+
+    .container {
+        max-width: 1000px;
+    }
+
+    .info-box {
+        background-color: var(--light-blue);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .important-list li {
+        margin-bottom: 10px;
+    }
+
+    textarea {
+        border: 1px solid var(--primary-blue);
+        border-radius: 8px;
+    }
+
+    .question-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        margin-bottom: 30px;
+    }
+
+    .question-table th {
+        padding: 10px;
+        border-radius: 8px 8px 0 0;
+        text-align: center;
+    }
+
+    .question-table .radio-cell {
+        background-color: var(--card-bg);
+        padding: 12px;
+        border-radius: 0 0 8px 8px;
+        text-align: center;
+    }
+
+    .question-text {
+        text-align: left;
+    }
+
+    .radio-cell input {
+        transform: scale(1.2);
+        accent-color: var(--primary-blue);
+    }
+
+    .points-cell {
+        font-weight: bold;
+    }
+
+    .section-total {
+        background-color: var(--light-blue);
+        padding: 12px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .final-question {
+        background-color: var(--card-bg);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .final-textarea-custom {
+        border: 1px solid var(--primary-blue);
+        border-radius: 8px;
+    }
+
+    .final-options-custom input {
+        transform: scale(1.2);
+        accent-color: var(--primary-blue);
+    }
+
+    button {
+        background-color: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background-color: var(--dark-blue);
+    }
+
+    .accordion-item {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .accordion-header button {
+        color: var(--dark-blue);
+        font-weight: bold;
+    }
+
+    .bg-light-subtle {
+        background-color: #d9ecff !important;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="ms-5 me-5 mt-4">
     <div class="row mb-3 align-items-center">
         <div class="col-8">
             <h1 class="mb-0">{{ quiz.title }}</h1>
@@ -52,7 +140,7 @@
         </div>
     </div>
 
-    <div class="p-3 mb-4" style="background-color: #f0f0f0;">
+    <div class="info-box">
         <p class="mb-0">
             На следниве страници се дадени активности кои вашето бебе можеби ги прави.
             Вашето бебе некои од активностите можеби веќе ги извршува, а други можеби сè уште не започнало да ги прави.
@@ -64,41 +152,35 @@
     <div class="row mb-5">
         <div class="col-6">
             <p class="fw-bold">Важни насоки што треба да се запомнат:</p>
-            <ul>
+            <ul class="important-list">
                 <li>Секоја активност пробајте ја со вашето бебе пред да одговорите</li>
                 <li>Направете овој прашалник да биде забавен за вас и вашето бебе, како да е игра</li>
                 <li>Бидете сигурни дека бебето е најадено и наспано</li>
-                <li>Ве молиме вратете го прашалникот најдоцна до <span
-                        style="border-bottom: 1px solid black; padding: 0 50px;"></span></li>
             </ul>
         </div>
         <div class="col-6">
             <p class="fw-bold">Забелешки:</p>
             <textarea class="form-control" style="height: 100px"></textarea>
-
         </div>
     </div>
 
+    <!-- Останати делови се исти, само со применетите класи и стилови -->
     <form method="POST">
         {% csrf_token %}
-
         {% for section in quiz.sections %}
             <h2>{{ section.name }}</h2>
-
             <table class="question-table">
                 <tr>
                     <th class="col-question"></th>
                     <th class="col-header">ДА</th>
                     <th class="col-header">ПОНЕКОГАШ</th>
                     <th class="col-header">СЕ УШТЕ НЕ</th>
-                    <th class="col-header">Поени</th>
                 </tr>
 
                 {% for q in section.questions %}
                     <tr>
-                        <td class="question-text">
+                        <td class="question-text w-75">
                             {{ forloop.counter }}. {{ q.text }}
-
                             {% if q.commands %}
                                 <div class="mt-2 p-3 border rounded bg-light-subtle">
                                     <ul class="list-unstyled ms-4 mb-0 small">
@@ -112,7 +194,6 @@
                                     </ul>
                                 </div>
                             {% endif %}
-
                             {% if q.example_combinations %}
                                 <div class="mt-2">
                                     <textarea name="{{ q.id }}_examples" class="form-control" rows="3"
@@ -122,53 +203,35 @@
                         </td>
                         {% for opt in q.options %}
                             <td class="radio-cell">
-                                <input type="radio" style="height: 20px;width: 20px" name="{{ q.id }}" value="{{ opt }}"
-                                       required>
+                                <input type="radio" name="{{ q.id }}" value="{{ opt }}" required>
                             </td>
                         {% endfor %}
-
-                        <td class="points-cell">___</td>
                     </tr>
                 {% endfor %}
             </table>
-
-            <div class="section-total text-end fw-bold fs-4">
-                <br>
-                {{ section.name }} ВКУПНО: _____
-            </div>
         {% endfor %}
 
         <h2>Завршни прашања</h2>
-
         <p>Родителите можат да пишуваат дополнителни коментари во просторот.</p>
 
         {% for q in quiz.final_questions %}
             <div class="final-question mb-4">
-                <p>
-                    {{ forloop.counter }}. {{ q.text }}
-                </p>
-
+                <p>{{ forloop.counter }}. {{ q.text }}</p>
                 <textarea name="txt_{{ q.id }}" class="form-control mb-3 final-textarea-custom" rows="3"
                           placeholder="Објаснете овде ако треба..."></textarea>
-
                 <div class="d-flex justify-content-end final-options-custom">
-
                     {% for opt in q.options %}
                         <div class="text-center me-4">
-                            <label class="d-block mb-1 fw-bold" for="{{ q.id }}_{{ opt }}">
-                                {{ opt }}
-                            </label>
-                            <input class="form-check-input" type="radio"
-                                   name="{{ q.id }}" id="{{ q.id }}_{{ opt }}" value="{{ opt }}" required>
+                            <label class="d-block mb-1 fw-bold" for="{{ q.id }}_{{ opt }}">{{ opt }}</label>
+                            <input class="form-check-input" type="radio" name="{{ q.id }}" id="{{ q.id }}_{{ opt }}" value="{{ opt }}" required>
                         </div>
                     {% endfor %}
-
                 </div>
             </div>
         {% endfor %}
 
-        <button>SEND</button>
+        <button type="submit">Испрати</button>
     </form>
 </div>
-</body>
-</html>
+
+{% endblock %}

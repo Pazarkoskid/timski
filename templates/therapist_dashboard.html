@@ -431,47 +431,53 @@
                             <div class="col-md-6">
                                 <label for="searchChild" class="form-label">Име на дете:</label>
                                 <input type="text" class="form-control" id="searchChild" 
-                                       placeholder="Внесете име на дете...">
+                                       placeholder="Внесете име на дете..."
+                                       value="{{ search_params.child }}">
                             </div>
                             <div class="col-md-6">
                                 <label for="searchParent" class="form-label">Име на родител:</label>
-                                <input type="text" class="form-control" id="searchParent" 
-                                       placeholder="Внесете име на родител...">
+                                <input type="text" class="form-control" id="searchParent"
+                                       placeholder="Внесете име на родител..."
+                                       value="{{ search_params.parent }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="searchAgeFrom" class="form-label">Возраст од:</label>
-                                <input type="number" class="form-control" id="searchAgeFrom" 
-                                       placeholder="0" min="0" max="60">
+                                <input type="number" class="form-control" id="searchAgeFrom"
+                                       placeholder="0" min="0" max="60"
+                                       value="{{ search_params.age_from }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="searchAgeTo" class="form-label">Возраст до:</label>
-                                <input type="number" class="form-control" id="searchAgeTo" 
-                                       placeholder="60" min="0" max="60">
+                                <input type="number" class="form-control" id="searchAgeTo"
+                                       placeholder="60" min="0" max="60"
+                                       value="{{ search_params.age_to }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="searchQuestionnaire" class="form-label">Прашалник:</label>
                                 <select class="form-control" id="searchQuestionnaire">
                                     <option value="">Сите прашалници</option>
                                     {% for months in age_months %}
-                                    <option value="{{ months }}">{{ months }} месеци</option>
+                                    <option value="{{ months }}"{% if search_params.questionnaire_int == months %} selected{% endif %}>{{ months }} месеци</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="searchDateFrom" class="form-label">Датум од:</label>
-                                <input type="date" class="form-control" id="searchDateFrom">
+                                <input type="date" class="form-control" id="searchDateFrom"
+                                       value="{{ search_params.date_from }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="searchDateTo" class="form-label">Датум до:</label>
-                                <input type="date" class="form-control" id="searchDateTo">
+                                <input type="date" class="form-control" id="searchDateTo"
+                                       value="{{ search_params.date_to }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="searchStatus" class="form-label">Статус:</label>
                                 <select class="form-control" id="searchStatus">
                                     <option value="">Сите статуси</option>
-                                    <option value="submitted">Поднесено</option>
-                                    <option value="reviewed">Одговорено</option>
-                                    <option value="completed">Завршено</option>
+                                    <option value="submitted" {% if search_params.status == 'submitted' %}selected{% endif %}>Поднесено</option>
+                                    <option value="reviewed" {% if search_params.status == 'reviewed' %}selected{% endif %}>Одговорено</option>
+                                    <option value="completed" {% if search_params.status == 'completed' %}selected{% endif %}>Завршено</option>
                                 </select>
                             </div>
                             <div class="col-12">
@@ -489,10 +495,53 @@
                 </div>
             </div>
 
-            <div id="searchResults" class="mt-4" style="display: none;">
+            <div id="searchResults" class="mt-4" {% if not search_results %}style="display: none;"{% endif %}>
                 <h5 class="mb-3">Резултати од пребарувањето:</h5>
                 <div id="resultsContainer" class="table-responsive">
-                    <!-- Резултатите ќе се вчитаат овде со JavaScript -->
+                    {% if search_results is not None %}
+                    {% if search_results %}
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Дете</th>
+                                <th>Возраст</th>
+                                <th>Прашалник</th>
+                                <th>Статус</th>
+                                <th>Датум</th>
+                                <th>Акции</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in search_results %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><strong>{{ r.child.first_name }} {{ r.child.last_name }}</strong></td>
+                                <td><span class="badge bg-info">{{ r.child.get_age_in_months }} мес.</span></td>
+                                <td>{{ r.questionnaire.title }}</td>
+                                <td>
+                                    {% if r.status == 'submitted' %}<span class="badge bg-warning">Чека на преглед</span>
+                                    {% elif r.status == 'reviewed' %}<span class="badge bg-success">Прегледано</span>
+                                    {% elif r.status == 'completed' %}<span class="badge bg-primary">Завршено</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ r.created_at|date:"d.m.Y" }}</small></td>
+                                <td>
+                                    <a href="{% url 'response_detail' r.id %}" class="btn btn-info btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-search display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Нема резултати за зададените критериуми.</h5>
+                    </div>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -510,46 +559,46 @@
         justify-content: center;
         font-size: 1.2rem;
     }
-    
+
     .dashboard-card {
         transition: all 0.3s ease;
         height: 100%;
     }
-    
+
     .dashboard-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    
+
     .nav-tabs .nav-link {
         font-weight: 500;
         padding: 12px 20px;
     }
-    
+
     .nav-tabs .nav-link.active {
         background-color: #f8f9fa;
         border-bottom-color: #f8f9fa;
     }
-    
+
     .progress {
         border-radius: 10px;
         overflow: hidden;
     }
-    
+
     .progress-bar {
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.8rem;
     }
-    
+
     .table th {
         font-weight: 600;
         color: #495057;
         background-color: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
     }
-    
+
     .badge {
         font-size: 0.85em;
         font-weight: 500;
@@ -564,32 +613,32 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltips.forEach(tooltip => {
         new bootstrap.Tooltip(tooltip);
     });
-    
+
     // Филтрирање на прегледани
     const searchReviewed = document.getElementById('searchReviewed');
     const filterAge = document.getElementById('filterAge');
     const filterPoints = document.getElementById('filterPoints');
     const resetFilters = document.getElementById('resetFilters');
-    
+
     function filterReviewedTable() {
         const searchText = searchReviewed.value.toLowerCase();
         const ageFilter = filterAge.value;
         const pointsFilter = filterPoints.value;
-        
+
         const rows = document.querySelectorAll('#reviewedTable tbody tr');
         let visibleCount = 0;
-        
+
         rows.forEach(row => {
             const searchData = row.getAttribute('data-search').toLowerCase();
             const age = parseInt(row.getAttribute('data-age'));
             const points = parseInt(row.getAttribute('data-points'));
             let shouldShow = true;
-            
+
             // Филтер по текст
             if (searchText && !searchData.includes(searchText)) {
                 shouldShow = false;
             }
-            
+
             // Филтер по возраст
             if (ageFilter) {
                 const [min, max] = ageFilter.split('-').map(Number);
@@ -597,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     shouldShow = false;
                 }
             }
-            
+
             // Филтер по поени
             if (pointsFilter) {
                 const [min, max] = pointsFilter.split('-').map(Number);
@@ -605,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     shouldShow = false;
                 }
             }
-            
+
             // Прикажи/скриј ред
             row.style.display = shouldShow ? '' : 'none';
             if (shouldShow) {
@@ -616,19 +665,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     if (searchReviewed) {
         searchReviewed.addEventListener('input', filterReviewedTable);
     }
-    
+
     if (filterAge) {
         filterAge.addEventListener('change', filterReviewedTable);
     }
-    
+
     if (filterPoints) {
         filterPoints.addEventListener('change', filterReviewedTable);
     }
-    
+
     if (resetFilters) {
         resetFilters.addEventListener('click', function() {
             searchReviewed.value = '';
@@ -637,64 +686,43 @@ document.addEventListener('DOMContentLoaded', function() {
             filterReviewedTable();
         });
     }
-    
+
     // Напредно пребарување
     const searchForm = document.getElementById('searchForm');
     const clearSearch = document.getElementById('clearSearch');
     const performSearch = document.getElementById('performSearch');
     const searchResults = document.getElementById('searchResults');
     const resultsContainer = document.getElementById('resultsContainer');
-    
+
     if (clearSearch) {
         clearSearch.addEventListener('click', function() {
             searchForm.reset();
             searchResults.style.display = 'none';
         });
     }
-    
+
     if (performSearch) {
-        performSearch.addEventListener('click', async function() {
-            // Во реален систем, ова би праќало AJAX request до серверот
-            // Ова е само пример за UI
-            
-            // Прикажи анимација за вчитување
-            resultsContainer.innerHTML = `
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Вчитување...</span>
-                    </div>
-                    <p class="mt-3">Вчитување резултати...</p>
-                </div>
-            `;
-            
-            searchResults.style.display = 'block';
-            
-            // Симулирај API повик
-            setTimeout(() => {
-                // Во реална имплементација, ова би било response од серверот
-                resultsContainer.innerHTML = `
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Дете</th>
-                                <th>Возраст</th>
-                                <th>Прашалник</th>
-                                <th>Статус</th>
-                                <th>Датум</th>
-                                <th>Акции</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="6" class="text-center py-4">
-                                    <i class="bi bi-info-circle text-primary me-2"></i>
-                                    За да функционира пребарувањето, потребно е да се имплементира серверски endpoint.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                `;
-            }, 1000);
+        performSearch.addEventListener('click', function() {
+            const child = document.getElementById('searchChild').value.trim();
+            const parent = document.getElementById('searchParent').value.trim();
+            const ageFrom = document.getElementById('searchAgeFrom').value.trim();
+            const ageTo = document.getElementById('searchAgeTo').value.trim();
+            const questionnaire = document.getElementById('searchQuestionnaire').value;
+            const dateFrom = document.getElementById('searchDateFrom').value;
+            const dateTo = document.getElementById('searchDateTo').value;
+            const status = document.getElementById('searchStatus').value;
+
+            const params = new URLSearchParams();
+            if (child) params.set('child', child);
+            if (parent) params.set('parent', parent);
+            if (ageFrom) params.set('age_from', ageFrom);
+            if (ageTo) params.set('age_to', ageTo);
+            if (questionnaire) params.set('questionnaire', questionnaire);
+            if (dateFrom) params.set('date_from', dateFrom);
+            if (dateTo) params.set('date_to', dateTo);
+            if (status) params.set('status', status);
+
+            window.location.href = `/therapist/dashboard/?tab=search&${params.toString()}`;
         });
     }
     

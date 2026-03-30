@@ -37,9 +37,6 @@
                         <div class="flex-grow-1 ms-3">
                             <h5 class="card-title mb-0">Мои деца</h5>
                             <p class="display-6 mb-0">{{ children.count }}</p>
-                            <a href="{% url 'add_child' %}" class="small text-primary text-decoration-none">
-                                Додади дете <i class="bi bi-plus-circle"></i>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -107,9 +104,6 @@
                         <i class="bi bi-people me-2"></i>
                         Мои деца
                     </h5>
-                    <a href="{% url 'add_child' %}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i> Додади дете
-                    </a>
                 </div>
                 <div class="card-body">
                     {% if children %}
