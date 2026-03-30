@@ -12,7 +12,9 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'first_name', 'last_name', 'role', 'phone', 'date_of_birth')
-
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
+        }
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
